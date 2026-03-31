@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>🇮🇹 2026 이탈리아 여행</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #FAF6EF;
+  --warm: #F5EDD8;
+  --terracotta: #C65D3B;
+  --terra-light: #E8806A;
+  --terra-dark: #9B3D22;
+  --olive: #5C6B3A;
+  --olive-light: #8A9E5A;
+  --gold: #C9963A;
+  --gold-light: #E8B85A;
+  --stone: #8B7355;
+  --ink: #2C1810;
+  --ink-soft: #4A3728;
+  --muted: #9B8878;
+  --border: rgba(139,115,85,0.2);
+  --card: rgba(255,255,255,0.7);
+  --shadow: 0 2px 16px rgba(44,24,16,0.08);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: 'Noto Sans KR', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background:
+    radial-gradient(ellipse at 0% 0%, rgba(198,93,59,0.07) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 100%, rgba(201,150,58,0.07) 0%, transparent 50%);
+  pointer-events:none; z-index:0;
+}
+
+/* ── HERO ── */
+.hero {
+  position:relative; z-index:1;
+  background: linear-gradient(160deg, var(--terracotta) 0%, #A04428 60%, #7B2D18 100%);
+  padding: 36px 20px 28px;
+  overflow:hidden;
+}
+.hero::before {
+  content:'';
+  position:absolute; inset:0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-flag { font-size:2.2rem; margin-bottom:6px; }
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.9rem;
+  color: #FFF8F0;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+.hero-sub { font-size:0.75rem; color:rgba(255,248,240,0.7); letter-spacing:0.15em; }
+.hero-dates {
+  margin-top: 14px;
+  display:flex; gap:8px; flex-wrap:wrap;
+}
+.hero-date-chip {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  color: #FFF8F0;
+}
+
+/* ── EXCHANGE RATE BAR ── */
+.exchange-bar {
+  position:relative; z-index:2;
+  background: var(--ink);
+  padding: 10px 16px;
+  display:flex; align-items:center; gap:10px;
+  flex-wrap:wrap;
+}
+.exchange-label { font-size:0.65rem; color:var(--gold-light); letter-spacing:0.1em; flex-shrink:0; }
+.exchange-rates { display:flex; gap:14px; flex:1; flex-wrap:wrap; }
+.exchange-item {
+  display:flex; align-items:baseline; gap:4px;
+}
+.exchange-curr { font-size:0.65rem; color:rgba(255,255,255,0.5); }
+.exchange-val { font-size:0.92rem; font-weight:700; color:#FFF8F0; }
+.exchange-sub { font-size:0.6rem; color:rgba(255,255,255,0.4); }
+.exchange-time { font-size:0.58rem; color:rgba(255,255,255,0.3); margin-left:auto; }
+.exchange-loading { font-size:0.72rem; color:rgba(255,255,255,0.5); }
+
+/* ── NAV TABS ── */
+.nav-wrap {
+  position:sticky; top:0; z-index:100;
+  background: var(--cream);
+  border-bottom: 1px solid var(--border);
+  padding: 0 6px;
+}
+.nav-tabs {
+  display:flex; overflow-x:auto; scrollbar-width:none;
+  gap:2px; padding: 8px 0;
+}
+.nav-tabs::-webkit-scrollbar { display:none; }
+.nav-tab {
+  flex-shrink:0;
+  padding: 7px 14px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.nav-tab.active {
+  background: var(--terracotta);
+  color: white;
+}
+
+/* ── SECTIONS ── */
+.section { display:none; padding: 16px 14px 80px; position:relative; z-index:1; }
+.section.active { display:block; }
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  color: var(--ink);
+  margin-bottom: 14px;
+  display:flex; align-items:center; gap:8px;
+}
+.section-title::after {
+  content:''; flex:1; height:1px; background:var(--border);
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+  backdrop-filter: blur(6px);
+  box-shadow: var(--shadow);
+}
+.card-header {
+  display:flex; justify-content:space-between; align-items:flex-start;
+  margin-bottom: 8px;
+}
+.card-title { font-size:0.85rem; font-weight:700; color:var(--ink); }
+.card-badge {
+  font-size:0.62rem; padding:2px 8px; border-radius:10px;
+  font-weight:600;
+}
+
+/* ── WEATHER ── */
+.weather-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.weather-card {
+  background: white;
+  border-radius:12px;
+  padding:12px;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+}
+.weather-date { font-size:0.65rem; color:var(--muted); margin-bottom:2px; }
+.weather-city {
+  font-weight:700; font-size:0.82rem; color:var(--ink);
+  margin-bottom:6px;
+}
+.weather-main { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+.weather-icon { font-size:1.6rem; }
+.weather-temp { font-size:1.2rem; font-weight:700; color:var(--terracotta); }
+.weather-desc { font-size:0.65rem; color:var(--muted); }
+.weather-detail {
+  display:grid; grid-template-columns:1fr 1fr; gap:4px;
+  border-top:1px solid var(--border); padding-top:6px;
+}
+.wd-item { font-size:0.62rem; color:var(--ink-soft); }
+.wd-label { color:var(--muted); }
+.weather-loading {
+  text-align:center; padding:30px; color:var(--muted); font-size:0.8rem;
+}
+
+/* ── SCHEDULE ── */
+.day-block { margin-bottom:12px; }
+.day-header {
+  display:flex; align-items:center; gap:8px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, var(--terracotta), var(--terra-dark));
+  border-radius: 10px 10px 0 0;
+  cursor: pointer;
+}
+.day-date { font-size:0.78rem; font-weight:700; color:white; }
+.day-city { font-size:0.72rem; color:rgba(255,255,255,0.8); flex:1; }
+.day-toggle { color:rgba(255,255,255,0.7); font-size:0.7rem; transition:transform 0.3s; }
+.day-block.open .day-toggle { transform:rotate(180deg); }
+.day-body {
+  display:none;
+  background:white;
+  border:1px solid var(--border);
+  border-top:none;
+  border-radius:0 0 10px 10px;
+  overflow:hidden;
+}
+.day-block.open .day-body { display:block; }
+.schedule-row {
+  display:flex; gap:10px; padding:9px 14px;
+  border-bottom:1px solid rgba(139,115,85,0.08);
+  align-items:flex-start;
+}
+.schedule-row:last-child { border-bottom:none; }
+.schedule-time {
+  font-size:0.62rem; color:var(--muted); min-width:52px;
+  padding-top:2px; flex-shrink:0;
+}
+.schedule-content { font-size:0.78rem; color:var(--ink-soft); line-height:1.5; flex:1; }
+.schedule-tag {
+  font-size:0.58rem; padding:2px 6px; border-radius:6px;
+  flex-shrink:0; margin-top:2px;
+}
+.tag-hotel { background:rgba(201,150,58,0.15); color:var(--gold); }
+.tag-train { background:rgba(92,107,58,0.15); color:var(--olive); }
+.tag-tour { background:rgba(198,93,59,0.12); color:var(--terracotta); }
+.tag-food { background:rgba(139,115,85,0.12); color:var(--stone); }
+.day-note {
+  padding:8px 14px;
+  background:rgba(201,150,58,0.06);
+  border-top:1px solid rgba(201,150,58,0.15);
+  font-size:0.7rem; color:var(--stone);
+}
+
+/* ── BUDGET ── */
+.budget-total {
+  background: linear-gradient(135deg, var(--ink), var(--ink-soft));
+  border-radius:12px; padding:16px;
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:12px;
+}
+.bt-label { font-size:0.72rem; color:rgba(255,255,255,0.6); margin-bottom:2px; }
+.bt-amount { font-size:1.6rem; font-weight:700; color:var(--gold-light); }
+.bt-sub { font-size:0.65rem; color:rgba(255,255,255,0.4); }
+.budget-row {
+  display:flex; align-items:center; padding:10px 0;
+  border-bottom:1px solid var(--border);
+  gap:10px;
+}
+.budget-row:last-child { border-bottom:none; }
+.budget-icon { font-size:1.1rem; width:28px; flex-shrink:0; text-align:center; }
+.budget-name { flex:1; font-size:0.82rem; color:var(--ink-soft); }
+.budget-note { font-size:0.62rem; color:var(--muted); margin-top:1px; }
+.budget-amount { font-size:0.88rem; font-weight:700; color:var(--ink); flex-shrink:0; }
+.budget-bar-wrap { width:100%; height:3px; background:rgba(139,115,85,0.15); border-radius:2px; margin-top:4px; }
+.budget-bar { height:3px; border-radius:2px; background:var(--terracotta); }
+
+.hotel-detail {
+  background:rgba(201,150,58,0.06);
+  border:1px solid rgba(201,150,58,0.2);
+  border-radius:10px; padding:12px; margin-top:12px;
+}
+.hotel-detail-title { font-size:0.72rem; font-weight:700; color:var(--gold); margin-bottom:8px; }
+.hotel-row {
+  display:flex; justify-content:space-between; padding:6px 0;
+  border-bottom:1px solid rgba(201,150,58,0.1);
+  font-size:0.75rem;
+}
+.hotel-row:last-child { border-bottom:none; }
+.hotel-name { color:var(--ink-soft); flex:1; }
+.hotel-price { font-weight:600; color:var(--ink); flex-shrink:0; }
+.hotel-info { font-size:0.62rem; color:var(--muted); margin-top:2px; }
+
+/* ── TRAIN ── */
+.train-card {
+  background:white;
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+  margin-bottom:10px;
+  box-shadow:var(--shadow);
+}
+.train-header {
+  background:linear-gradient(135deg, var(--olive), #3D4C25);
+  padding:8px 14px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.train-date { font-size:0.72rem; font-weight:700; color:white; }
+.train-paid {
+  font-size:0.6rem; padding:2px 8px; border-radius:8px;
+  background:rgba(255,255,255,0.2); color:white;
+}
+.train-body { padding:12px 14px; }
+.train-route {
+  display:flex; align-items:center; gap:8px; margin-bottom:8px;
+}
+.train-from, .train-to { font-size:0.88rem; font-weight:700; color:var(--ink); }
+.train-arrow { color:var(--olive-light); font-size:0.8rem; flex:1; text-align:center; }
+.train-times { display:flex; justify-content:space-between; font-size:0.7rem; color:var(--muted); margin-bottom:8px; }
+.train-meta { display:flex; gap:12px; font-size:0.7rem; }
+.train-duration { color:var(--olive); font-weight:600; }
+.train-price { color:var(--terracotta); font-weight:700; }
+.train-note { font-size:0.65rem; color:var(--stone); margin-top:6px; line-height:1.5; }
+.train-total {
+  background:var(--warm);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px 14px;
+  display:flex; justify-content:space-between; align-items:center;
+  margin-top:4px;
+}
+.tt-label { font-size:0.72rem; color:var(--muted); }
+.tt-eur { font-size:1.1rem; font-weight:700; color:var(--olive); }
+.tt-krw { font-size:0.75rem; color:var(--stone); margin-top:1px; }
+
+/* ── TODO ── */
+.todo-item {
+  display:flex; align-items:flex-start; gap:10px;
+  padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+.todo-item:last-child { border-bottom:none; }
+.todo-check {
+  width:20px; height:20px; border-radius:6px;
+  border:2px solid var(--border);
+  background:white; flex-shrink:0;
+  cursor:pointer; transition:all 0.2s;
+  display:flex; align-items:center; justify-content:center;
+  margin-top:1px;
+}
+.todo-check.done { background:var(--terracotta); border-color:var(--terracotta); color:white; font-size:0.7rem; }
+.todo-text { font-size:0.8rem; color:var(--ink-soft); line-height:1.5; flex:1; }
+.todo-text.done { text-decoration:line-through; color:var(--muted); }
+
+.packing-item {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 12px; margin:4px;
+  background:white; border:1px solid var(--border);
+  border-radius:20px; font-size:0.75rem; color:var(--ink-soft);
+  cursor:pointer; transition:all 0.2s;
+}
+.packing-item.done {
+  background:rgba(92,107,58,0.1); border-color:var(--olive-light);
+  color:var(--olive); text-decoration:line-through;
+}
+.packing-check { font-size:0.7rem; }
+
+.warning-item {
+  display:flex; gap:10px; padding:10px 0;
+  border-bottom:1px solid var(--border);
+  align-items:flex-start;
+}
+.warning-item:last-child { border-bottom:none; }
+.warning-icon { font-size:1rem; flex-shrink:0; margin-top:1px; }
+.warning-text { font-size:0.78rem; color:var(--ink-soft); line-height:1.5; }
+
+/* ── PREP ── */
+.prep-item {
+  display:flex; gap:10px; padding:9px 0;
+  border-bottom:1px solid var(--border);
+  align-items:flex-start;
+}
+.prep-item:last-child { border-bottom:none; }
+.prep-city {
+  font-size:0.65rem; padding:2px 8px; border-radius:8px;
+  background:rgba(198,93,59,0.1); color:var(--terracotta);
+  flex-shrink:0; min-width:44px; text-align:center; margin-top:2px;
+}
+.prep-text { font-size:0.78rem; color:var(--ink-soft); line-height:1.5; }
+
+/* ── PROGRESS ── */
+.progress-bar-wrap { height:6px; background:var(--border); border-radius:3px; margin-top:10px; }
+.progress-bar { height:6px; border-radius:3px; background:var(--terracotta); transition:width 0.5s; }
+.progress-label { font-size:0.65rem; color:var(--muted); margin-top:4px; text-align:right; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-flag">🇮🇹</div>
+  <h1 class="hero-title">2026 이탈리아<br>여행 가이드</h1>
+  <p class="hero-sub">5월 22일 → 6월 2일 · 12박 13일</p>
+  <div class="hero-dates">
+    <span class="hero-date-chip">✈️ OZ561 출국</span>
+    <span class="hero-date-chip">🏨 11박</span>
+    <span class="hero-date-chip">🚂 기차 8회</span>
+    <span class="hero-date-chip">🚗 렌트 4일</span>
+  </div>
+</div>
+
+<!-- EXCHANGE BAR -->
+<div class="exchange-bar">
+  <span class="exchange-label">💱 실시간 환율</span>
+  <div class="exchange-rates" id="exchangeRates">
+    <span class="exchange-loading">로딩 중…</span>
+  </div>
+  <span class="exchange-time" id="exchangeTime"></span>
+</div>
+
+<!-- NAV -->
+<div class="nav-wrap">
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showSection('weather')">🌤 날씨</button>
+    <button class="nav-tab" onclick="showSection('schedule')">📅 일정</button>
+    <button class="nav-tab" onclick="showSection('budget')">💰 예산</button>
+    <button class="nav-tab" onclick="showSection('train')">🚂 기차</button>
+    <button class="nav-tab" onclick="showSection('todo')">✅ 할일</button>
+    <button class="nav-tab" onclick="showSection('prep')">🎒 준비</button>
+  </div>
+</div>
+
+<!-- ══ WEATHER ══ -->
+<div class="section active" id="section-weather">
+  <div class="section-title">날씨 예보</div>
+  <div id="weatherGrid" class="weather-grid">
+    <div style="grid-column:1/-1" class="weather-loading">🌤 날씨 정보를 불러오는 중…</div>
+  </div>
+  <p style="font-size:0.62rem;color:var(--muted);text-align:center;margin-top:10px;">
+    Open-Meteo 기반 · 여행 기간(5/22~6/2) 예보 • 기상 예보는 변동될 수 있습니다
+  </p>
+</div>
+
+<!-- ══ SCHEDULE ══ -->
+<div class="section" id="section-schedule">
+  <div class="section-title">날짜별 일정</div>
+  <div id="scheduleList"></div>
+</div>
+
+<!-- ══ BUDGET ══ -->
+<div class="section" id="section-budget">
+  <div class="section-title">예산 현황</div>
+
+  <div class="budget-total">
+    <div>
+      <div class="bt-label">총 예상 지출</div>
+      <div class="bt-amount">₩8,237,450</div>
+      <div class="bt-sub">기본 예산 ₩5,500,000 대비 +₩2,737,450</div>
+    </div>
+    <div style="font-size:2rem">📊</div>
+  </div>
+
+  <div class="card">
+    <div id="budgetList"></div>
+  </div>
+
+  <div class="hotel-detail">
+    <div class="hotel-detail-title">🏨 호텔 상세</div>
+    <div class="hotel-row">
+      <div><div class="hotel-name">로마 3박 · Best Western Globus</div><div class="hotel-info">5/22~5/25 · 아고다 · 조식포함 · 현지 54EUR 별도</div></div>
+      <div class="hotel-price">₩967,000</div>
+    </div>
+    <div class="hotel-row">
+      <div><div class="hotel-name">피렌체 2박 · Hotel Delle Nazioni</div><div class="hotel-info">5/25~5/27 · 더현대 · 조식포함 · 현지 24EUR 별도</div></div>
+      <div class="hotel-price">₩850,000</div>
+    </div>
+    <div class="hotel-row">
+      <div><div class="hotel-name">베네치아 1박 · Charming Palace</div><div class="hotel-info">5/27~5/28 · 호텔스 · 조식미포함 · 현지 10EUR 별도</div></div>
+      <div class="hotel-price">₩462,300</div>
+    </div>
+    <div class="hotel-row">
+      <div><div class="hotel-name">돌로미티 2박 (취소 가능)</div><div class="hotel-info">5/28~5/30 · 호텔스 · 조식미포함 · 현지 11EUR · 무료주차</div></div>
+      <div class="hotel-price">₩740,000</div>
+    </div>
+    <div class="hotel-row">
+      <div><div class="hotel-name">토리노 3박 · Agora Boutique</div><div class="hotel-info">5/30~6/2 · 호텔스 · 조식미포함 · 현지 13.8EUR 별도</div></div>
+      <div class="hotel-price">₩1,180,000</div>
+    </div>
+    <div class="hotel-row" style="background:rgba(201,150,58,0.05);font-weight:700;">
+      <div class="hotel-name">호텔 합계 (1박 평균 ₩381,755)</div>
+      <div class="hotel-price">₩4,199,300</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TRAIN ══ -->
+<div class="section" id="section-train">
+  <div class="section-title">기차 일정</div>
+  <div id="trainList"></div>
+  <div class="train-total">
+    <div><div class="tt-label">기차 합계</div></div>
+    <div style="text-align:right">
+      <div class="tt-eur">283 EUR</div>
+      <div class="tt-krw">약 ₩495,250</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TODO ══ -->
+<div class="section" id="section-todo">
+  <div class="section-title">할일 목록</div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">🗓 예약 & 확인 사항</span>
+    </div>
+    <div id="todoList"></div>
+  </div>
+
+  <div class="progress-bar-wrap" id="progressWrap" style="margin:0 0 16px;"></div>
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="progress-label" id="progressLabel"></div>
+
+  <div class="section-title" style="margin-top:8px;">준비물 체크리스트</div>
+  <div class="card">
+    <div id="packingList" style="display:flex;flex-wrap:wrap;padding:4px 0;"></div>
+  </div>
+
+  <div class="section-title" style="margin-top:8px;">⚠️ 주의사항</div>
+  <div class="card">
+    <div id="warningList"></div>
+  </div>
+</div>
+
+<!-- ══ PREP ══ -->
+<div class="section" id="section-prep">
+  <div class="section-title">여행 준비</div>
+  <div class="card">
+    <div id="prepList"></div>
+  </div>
+</div>
+
+<script>
+/* ── DATA ── */
+const SCHEDULE = [
+  { date:'5/22(금)', city:'입국', hotel:'Best Western Globus Hotel', hotelInfo:'조식포함', items:[
+    {time:'출발', content:'OZ561 출국 (인천 T2→T3, 13:20→17:35)', tag:'tour'},
+    {time:'20:00~', content:'레오나르도 익스프레스 탑승 (32분)', tag:'train'},
+    {time:'저녁', content:'로마 호텔 체크인', tag:'hotel'},
+  ], note:'아이 레오나르도 익스프레스 무료'},
+  { date:'5/23(토)', city:'로마', hotel:'Best Western Globus Hotel', hotelInfo:'조식포함', items:[
+    {time:'아침', content:'호텔 조식', tag:'food'},
+    {time:'오전', content:'콜로세움 · 포로 로마노 · 캄파돌리오 광장 · 비토리오 2세 기념관', tag:'tour'},
+    {time:'오후', content:'판테온 · 나보나 광장 · 캄포 데 피오리 · 콜로세움 야경', tag:'tour'},
+  ], note:'판테온 예약제 / 클룩으로 콜로세움 줄 따로'},
+  { date:'5/24(일)', city:'로마', hotel:'Best Western Globus Hotel', hotelInfo:'조식포함', items:[
+    {time:'아침', content:'호텔 조식', tag:'food'},
+    {time:'오전', content:'트레비 분수 · 스페인 계단 · 콘도티거리 · 판초언덕', tag:'tour'},
+    {time:'오후', content:'진실의 입 · 트라스테베레 · 벼룩시장 (포르타 포르테세)', tag:'tour'},
+    {time:'옵션', content:'나폴리 또는 티볼리 당일치기', tag:'tour'},
+  ], note:''},
+  { date:'5/25(월)', city:'로마→피렌체', hotel:'Hotel Delle Nazioni', hotelInfo:'조식포함', items:[
+    {time:'아침', content:'호텔 조식', tag:'food'},
+    {time:'오전', content:'바티칸 박물관 · 젤라또 · 천사의 성 · 나보나광장', tag:'tour'},
+    {time:'16:35', content:'기차: 로마→피렌체 (16:35→18:11, 1h 36m)', tag:'train'},
+    {time:'저녁', content:'피렌체 체크인 / 저녁식사 (ZaZa)', tag:'food'},
+  ], note:'기차 결제완'},
+  { date:'5/26(화)', city:'피사·피렌체', hotel:'Hotel Delle Nazioni', hotelInfo:'조식포함', items:[
+    {time:'아침', content:'호텔 조식', tag:'food'},
+    {time:'08:53', content:'기차: 피렌체→피사 (1h, 레지오날레)', tag:'train'},
+    {time:'피사', content:'피사의 탑 · 점심식사', tag:'tour'},
+    {time:'13:09', content:'기차: 피사→피렌체 복귀 (52분)', tag:'train'},
+    {time:'오후', content:'산 로렌초 성당 · 두오모 · 베키오 다리 · 오데온 서점 · 미켈란젤로 언덕', tag:'tour'},
+    {time:'저녁', content:'저녁식사', tag:'food'},
+  ], note:'레지오날레 표 현장구매 가능'},
+  { date:'5/27(수)', city:'베네치아', hotel:'Charming Palace Corte del Teatro', hotelInfo:'조식미포함', items:[
+    {time:'아침', content:'기차: 피렌체→베네치아 (08:20→10:34, 2h 14m)', tag:'train'},
+    {time:'낮', content:'이동 & 호텔 짐 보관', tag:'hotel'},
+    {time:'오후', content:'리알토 다리 · 곤돌라 · 골목골목 탐방', tag:'tour'},
+    {time:'저녁', content:'산 마르코 광장 · 두칼레 궁전 · 탄식의 다리', tag:'tour'},
+    {time:'저녁', content:'저녁식사', tag:'food'},
+  ], note:'기차 결제완 / 곤돌라: 낮 90EUR, 밤 110EUR (30분)'},
+  { date:'5/28(목)', city:'돌로미티', hotel:'Isarcus Residence / Smart hotel Saslong', hotelInfo:'조식미포함', items:[
+    {time:'아침', content:'바포레토로 이동', tag:'tour'},
+    {time:'09:00', content:'렌트카 대여 · 마트 장보기 (먹을거, 피크닉)', tag:'tour'},
+    {time:'오전', content:'운전: 베네치아→코르티나 담페초 (2~2.5시간)', tag:'tour'},
+    {time:'오후', content:'돌로미티 동부: 코르티나 담페초 · 라가주오이 · 친퀘토리 · 브라이에스 호수', tag:'tour'},
+    {time:'저녁', content:'저녁식사', tag:'food'},
+  ], note:'주차장 예약 필요 / 렌트카 사무소 동선 확인'},
+  { date:'5/29(금)', city:'돌로미티', hotel:'Isarcus Residence / Smart hotel Saslong', hotelInfo:'조식미포함', items:[
+    {time:'오전', content:'돌로미티 서부: 오르티세이 · 카레짜 호수 · 세체다 (예약필요!)', tag:'tour'},
+    {time:'옵션', content:'인스부르크 (슈니첼 등)', tag:'tour'},
+    {time:'저녁', content:'저녁식사', tag:'food'},
+  ], note:'세체다 케이블카 사전예약 필수 (5/22 오픈)'},
+  { date:'5/30(토)', city:'베로나→몬차→토리노', hotel:'Agora Boutique Stays', hotelInfo:'조식미포함', items:[
+    {time:'아침', content:'운전: 돌로미티→베로나 (2.5~3시간)', tag:'tour'},
+    {time:'베로나', content:'아레나 · 줄리엣의 집 · 점심식사 간단히', tag:'tour'},
+    {time:'오후', content:'운전: 베로나→몬차 (2시간)', tag:'tour'},
+    {time:'16:00', content:'GT 월드 챌린지 레이싱 관람', tag:'tour'},
+    {time:'저녁', content:'운전: 몬차→토리노 (2.5시간) · 체크인', tag:'hotel'},
+  ], note:'몬차 레이싱 티켓 사전 구매 필요'},
+  { date:'5/31(일)', city:'알바·바롤로·브라', hotel:'Agora Boutique Stays', hotelInfo:'조식미포함', items:[
+    {time:'오전', content:'바롤로 와이너리 방문', tag:'tour'},
+    {time:'점심', content:'브라에서 점심식사', tag:'food'},
+    {time:'오후', content:'알바 트러플 시장', tag:'tour'},
+    {time:'21:00', content:'렌트카 반납', tag:'tour'},
+    {time:'저녁', content:'저녁식사 (Eataly)', tag:'food'},
+  ], note:'와이너리 사전 예약 필요'},
+  { date:'6/1(월)', city:'토리노', hotel:'Agora Boutique Stays', hotelInfo:'조식미포함', items:[
+    {time:'09:00~14:00', content:'이집트 박물관 (AM 9~PM 2, 월요일만)', tag:'tour'},
+    {time:'점심', content:'점심식사 · 디저트', tag:'food'},
+    {time:'오후', content:'토리노 시내 관광', tag:'tour'},
+    {time:'저녁', content:'저녁식사', tag:'food'},
+  ], note:''},
+  { date:'6/2(화)', city:'밀라노·출국', hotel:'-', hotelInfo:'', items:[
+    {time:'08:54', content:'기차: 토리노→밀라노 (08:54→10:45, 1h 51m)', tag:'train'},
+    {time:'오전', content:'밀라노 두오모 · 리나센테 · 기타 관광', tag:'tour'},
+    {time:'점심', content:'점심식사', tag:'food'},
+    {time:'저녁', content:'말펜사 익스프레스 탑승 (1h)', tag:'train'},
+    {time:'22:00', content:'귀국 OZ582 (T1, 22:00→16:35+1)', tag:'tour'},
+  ], note:'레지오날레 표 현장구매'},
+];
+
+const BUDGET = [
+  { icon:'✈️', name:'항공권', amount:1902000, note:'+ M포인트 12.5만', max:5500000 },
+  { icon:'🏨', name:'호텔 (11박)', amount:4199300, note:'평균 1박 ₩381,755', max:5500000 },
+  { icon:'🚂', name:'기차', amount:410000, note:'8개 구간', max:5500000 },
+  { icon:'🚗', name:'렌트카', amount:1135750, note:'현장결제 648.93EUR', max:5500000 },
+  { icon:'⛽', name:'톨비·유류비·주차', amount:300000, note:'', max:5500000 },
+  { icon:'🛡️', name:'여행자보험', amount:100000, note:'', max:5500000 },
+  { icon:'🏙️', name:'도시세', amount:190400, note:'112EUR', max:5500000 },
+];
+
+const TRAINS = [
+  { date:'5/22(금)', route:'레오나르도 익스프레스', from:'피우미치노 공항', to:'로마 시내', dep:'', arr:'', duration:'32m', price:28, note:'아이 무료', paid:false },
+  { date:'5/25(월)', route:'로마→피렌체', from:'로마 테르미니', to:'피렌체 S.M.N', dep:'16:35', arr:'18:11', duration:'1h 36m', price:60, note:'결제 완료', paid:true },
+  { date:'5/26(화)', route:'피렌체→피사', from:'피렌체', to:'피사 C.', dep:'08:28', arr:'09:28', duration:'1h', price:28, note:'베스트: 08:28 출발 / 복귀: 13:09 (52분)', paid:false },
+  { date:'5/26(화)', route:'피사→피렌체 복귀', from:'피사 C.', to:'피렌체', dep:'13:09', arr:'14:01', duration:'52m', price:28, note:'레지오날레 현장구매', paid:false },
+  { date:'5/27(수)', route:'피렌체→베네치아', from:'피렌체', to:'베네치아 S.L', dep:'08:20', arr:'10:34', duration:'2h 14m', price:65, note:'결제 완료', paid:true },
+  { date:'5/27(수)', route:'베네치아→베로나', from:'베네치아', to:'베로나', dep:'19:10', arr:'20:38', duration:'1h 28m', price:31, note:'1시간 단위', paid:false },
+  { date:'5/30(토)', route:'베로나→토리노', from:'베로나', to:'토리노', dep:'17:32', arr:'21:06', duration:'3h 34m', price:63, note:'5/31 아침 대안: 07:32→09:56 (57EUR)', paid:false },
+  { date:'6/2(화)', route:'토리노→밀라노', from:'토리노 P.N', to:'밀라노 C.', dep:'08:54', arr:'10:45', duration:'1h 51m', price:38, note:'대안 없음', paid:false },
+  { date:'6/2(화)', route:'말펜사 익스프레스', from:'밀라노 C.', to:'말펜사 공항', dep:'', arr:'', duration:'~1h', price:36, note:'패밀리 36EUR', paid:false },
+];
+
+const TODOS = [
+  '로마, 피렌체 예약할 거 예약하고 사이트 알아보기 (클룩 등)',
+  '호텔 가기 전 메일 돌리고 확인 받기',
+  '스마트 호텔 류 가기 전 어떻게 하는지 알아보기 (왓츠앱 등)',
+  '베네치아, 돌로미티 중복 숙소 취소',
+  '산장 케이블카 오픈 일정 확인',
+  '돌로미티 동선과 일정, 뷰포인트, 밥집, 패스 류',
+  '몬차 레이싱 티켓 예매',
+  '전자여행허가제 (EES) + 이탈리아 여행허가제 (ETIAS 2026말) 확인',
+  '스마트패스, 영유아 패스트트랙 확인',
+  '라운지 이용 확인',
+  '프리비아 일정 확인',
+  '예약: 콜로세움, 바티칸, 판테온, 우피치 미술관, 두오모, 피사의 사탑, 최후의 만찬, 산 마르코 대성당',
+  '예약: 돌로미티 트레치메 디 라바레도 앞 7km 구간 (차량 진입 날짜/시간/차량 사전등록)',
+  '세탁기 있는지 확인 및 코인 세탁소 (Lavanderia Self-service) 위치 확인',
+  '환전 + 기존 700EUR 확인',
+  '심카드 / 이심 / 여행자보험 준비',
+];
+
+const PACKING = [
+  '트렁크 덮을 검은천','돗자리','아이젠','자물쇠 와이어','스마트 태그',
+  '부스터 시트 (당근)','경량패딩','플리스','멀티 콘센트','여권 사본',
+  '항공권 프린트','운전면허증','국제운전면허증','비상약품','선크림','선글라스','우산',
+];
+
+const WARNINGS = [
+  '체크인 시스템 확인 — 여권사진/개인정보 일일이 등록해야 하며 지정 시간까지 안 하면 예약 취소될 수 있음',
+  '아파트먼트는 리셉션이 없거나 시간이 한정적이라 짐보관 어려울 수 있음',
+  '컨택리스 카드로 교통요금 결제 시 무임승차자로 간주 벌금 부과 악용 검표원 주의 — 버스·트램은 실물 또는 디지털 티켓이 안전',
+  '피사 소매치기 주의 — 계단, 에스컬레이터, 음료, 손수건 경계',
+  '카드 비밀번호 6자리인 경우 4자리 + 00 입력',
+  '레지오날레 기차는 고정요금제, 현장구매 가능',
+  '온라인 기차 티켓 — 별도 체크인/각인 불필요 (출발 시각 자동 체크인)',
+  '트렌잇 (Trenit) 앱으로 기차 연착 및 파업 정보 확인',
+];
+
+const PREP = [
+  { city:'사전', text:'출발 7일 전 호텔 연락, 아파트호텔 앱 다운 및 기입' },
+  { city:'사전', text:'호텔에 메일 재확인' },
+  { city:'입출국', text:'전자여행허가제 (EES) + 이탈리아 여행허가제 (ETIAS 2026말) 확인' },
+  { city:'입출국', text:'수연 아시아나 마일리지 제대로 쌓이는지 확인' },
+  { city:'입출국', text:'터미널 3 도착 후 셔틀 트레인 피플무버 한 정거장 이동' },
+  { city:'입출국', text:'출입국 카드 & 세관 신고서 작성 불필요 (더블체크 필요)' },
+  { city:'로마', text:'콜로세움 클룩 예매 — 줄 따로 서서 입장 가능' },
+  { city:'로마', text:'트레비 분수 & 판테온 예약제' },
+  { city:'베네치아', text:'곤돌라: 낮 90EUR, 밤 110EUR (30분, 노래 없음)' },
+  { city:'몬차', text:'레이싱 티켓 사전 구매 (48EUR)' },
+  { city:'토리노', text:'주차: Ferraris, Corso Bolzano (ZTL 밖)' },
+];
+
+/* ── WEATHER API ── */
+const CITY_COORDS = [
+  { name:'로마', lat:41.9028, lon:12.4964, dates:['5/22','5/23','5/24','5/25'] },
+  { name:'피렌체', lat:43.7696, lon:11.2558, dates:['5/25','5/26'] },
+  { name:'베네치아', lat:45.4408, lon:12.3155, dates:['5/27'] },
+  { name:'돌로미티', lat:46.5396, lon:12.1357, dates:['5/28','5/29'] },
+  { name:'토리노', lat:45.0703, lon:7.6869, dates:['5/30','5/31','6/1'] },
+  { name:'밀라노', lat:45.4642, lon:9.1900, dates:['6/2'] },
+];
+
+async function fetchWeather() {
+  const grid = document.getElementById('weatherGrid');
+  grid.innerHTML = '';
+  try {
+    for (const city of CITY_COORDS) {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,sunrise,sunset&timezone=Europe%2FRome&start_date=2026-05-22&end_date=2026-06-02`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const daily = data.daily;
+
+      for (let i = 0; i < daily.time.length; i++) {
+        const dateStr = daily.time[i]; // 2026-05-22
+        const mmdd = dateStr.slice(5).replace('-','/'); // 05/22
+        const mmddShort = mmdd.replace(/^0/,''); // 5/22
+
+        const matchDate = city.dates.some(d => {
+          const nd = d.replace('5/','05/').replace('6/','06/');
+          return nd === mmdd || d === mmddShort;
+        });
+        if (!matchDate) continue;
+
+        const tmax = daily.temperature_2m_max[i];
+        const tmin = daily.temperature_2m_min[i];
+        const wc = daily.weathercode[i];
+        const sunrise = daily.sunrise[i]?.slice(11,16);
+        const sunset = daily.sunset[i]?.slice(11,16);
+
+        const {icon, desc} = wcToEmoji(wc);
+
+        const card = document.createElement('div');
+        card.className = 'weather-card';
+        card.innerHTML = `
+          <div class="weather-date">${city.dates[0] === mmddShort || city.dates.includes(mmddShort) ? mmddShort : mmddShort}</div>
+          <div class="weather-city">${city.name}</div>
+          <div class="weather-main">
+            <span class="weather-icon">${icon}</span>
+            <div>
+              <div class="weather-temp">${Math.round(tmax)}° / ${Math.round(tmin)}°</div>
+              <div class="weather-desc">${desc}</div>
+            </div>
+          </div>
+          <div class="weather-detail">
+            <div class="wd-item"><span class="wd-label">일출 </span>${sunrise||'-'}</div>
+            <div class="wd-item"><span class="wd-label">일몰 </span>${sunset||'-'}</div>
+          </div>
+        `;
+        grid.appendChild(card);
+      }
+    }
+    if (!grid.children.length) grid.innerHTML = '<div class="weather-loading">날씨 데이터가 없습니다</div>';
+  } catch(e) {
+    grid.innerHTML = '<div class="weather-loading">⚠️ 날씨를 불러올 수 없습니다<br><small>인터넷 연결을 확인해 주세요</small></div>';
+  }
+}
+
+function wcToEmoji(wc) {
+  if (wc === 0) return {icon:'☀️', desc:'맑음'};
+  if (wc <= 2) return {icon:'🌤', desc:'대체로 맑음'};
+  if (wc <= 3) return {icon:'☁️', desc:'흐림'};
+  if (wc <= 49) return {icon:'🌫️', desc:'안개'};
+  if (wc <= 59) return {icon:'🌦️', desc:'이슬비'};
+  if (wc <= 69) return {icon:'🌧️', desc:'비'};
+  if (wc <= 79) return {icon:'🌨️', desc:'눈'};
+  if (wc <= 84) return {icon:'🌦️', desc:'소나기'};
+  return {icon:'⛈️', desc:'뇌우'};
+}
+
+/* ── EXCHANGE RATE ── */
+async function fetchExchange() {
+  try {
+    const res = await fetch('https://open.er-api.com/v6/latest/EUR');
+    const data = await res.json();
+    const krw = data.rates.KRW;
+    const usd = data.rates.USD;
+
+    document.getElementById('exchangeRates').innerHTML = `
+      <div class="exchange-item">
+        <span class="exchange-curr">EUR</span>
+        <span class="exchange-val">₩${Math.round(krw).toLocaleString()}</span>
+      </div>
+      <div class="exchange-item">
+        <span class="exchange-curr">USD</span>
+        <span class="exchange-val">₩${Math.round(krw/usd).toLocaleString()}</span>
+      </div>
+      <div class="exchange-item" style="color:var(--gold-light);font-size:0.7rem;">
+        100EUR = ₩${Math.round(krw*100/1000)*100 >= 1000 ? (Math.round(krw*100/100)).toLocaleString() : Math.round(krw*100).toLocaleString()}
+      </div>
+    `;
+    const now = new Date();
+    document.getElementById('exchangeTime').textContent = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} 기준`;
+  } catch(e) {
+    document.getElementById('exchangeRates').innerHTML = '<span class="exchange-loading">환율 로드 실패</span>';
+  }
+}
+
+/* ── RENDER SCHEDULE ── */
+function renderSchedule() {
+  const list = document.getElementById('scheduleList');
+  const tagLabel = {train:'기차', hotel:'숙박', tour:'관광', food:'식사'};
+  const tagColor = {train:'tag-train', hotel:'tag-hotel', tour:'tag-tour', food:'tag-food'};
+
+  SCHEDULE.forEach((day, idx) => {
+    const block = document.createElement('div');
+    block.className = 'day-block' + (idx === 0 ? ' open' : '');
+    const hotelHtml = day.hotel !== '-' ? `<span style="font-size:0.65rem;color:rgba(255,255,255,0.7);">🏨 ${day.hotel}</span>` : '';
+    block.innerHTML = `
+      <div class="day-header" onclick="toggleDay(this)">
+        <div>
+          <div class="day-date">${day.date}</div>
+          <div class="day-city">${day.city}</div>
+          ${hotelHtml}
+        </div>
+        <span class="day-toggle">▼</span>
+      </div>
+      <div class="day-body">
+        ${day.items.map(item => `
+          <div class="schedule-row">
+            <span class="schedule-time">${item.time}</span>
+            <span class="schedule-content">${item.content}</span>
+            <span class="schedule-tag ${tagColor[item.tag]}">${tagLabel[item.tag]}</span>
+          </div>
+        `).join('')}
+        ${day.note ? `<div class="day-note">📌 ${day.note}</div>` : ''}
+      </div>
+    `;
+    list.appendChild(block);
+  });
+}
+
+function toggleDay(el) {
+  el.closest('.day-block').classList.toggle('open');
+}
+
+/* ── RENDER BUDGET ── */
+function renderBudget() {
+  const total = BUDGET.reduce((s,b) => s+b.amount, 0);
+  const list = document.getElementById('budgetList');
+  list.innerHTML = BUDGET.map(b => `
+    <div class="budget-row">
+      <span class="budget-icon">${b.icon}</span>
+      <div style="flex:1">
+        <div class="budget-name">${b.name}</div>
+        ${b.note ? `<div class="budget-note">${b.note}</div>` : ''}
+        <div class="budget-bar-wrap"><div class="budget-bar" style="width:${(b.amount/total*100).toFixed(1)}%"></div></div>
+      </div>
+      <span class="budget-amount">₩${b.amount.toLocaleString()}</span>
+    </div>
+  `).join('');
+}
+
+/* ── RENDER TRAINS ── */
+function renderTrains() {
+  const list = document.getElementById('trainList');
+  list.innerHTML = TRAINS.map(t => `
+    <div class="train-card">
+      <div class="train-header">
+        <span class="train-date">${t.date}</span>
+        ${t.paid ? '<span class="train-paid">✓ 결제완</span>' : ''}
+      </div>
+      <div class="train-body">
+        <div class="train-route">
+          <span class="train-from">${t.from}</span>
+          <span class="train-arrow">——▶</span>
+          <span class="train-to">${t.to}</span>
+        </div>
+        ${t.dep || t.arr ? `<div class="train-times"><span>${t.dep || ''}</span><span>${t.arr || ''}</span></div>` : ''}
+        <div class="train-meta">
+          <span class="train-duration">⏱ ${t.duration}</span>
+          <span class="train-price">💶 ${t.price}EUR</span>
+        </div>
+        ${t.note ? `<div class="train-note">📌 ${t.note}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ── RENDER TODOS ── */
+let todoState = {};
+let packingState = {};
+
+function renderTodos() {
+  TODOS.forEach((t,i) => { if(todoState[i]===undefined) todoState[i]=false; });
+  const list = document.getElementById('todoList');
+  list.innerHTML = TODOS.map((text, i) => `
+    <div class="todo-item">
+      <div class="todo-check ${todoState[i]?'done':''}" onclick="toggleTodo(${i})">${todoState[i]?'✓':''}</div>
+      <span class="todo-text ${todoState[i]?'done':''}">${text}</span>
+    </div>
+  `).join('');
+  updateProgress();
+
+  // Packing
+  PACKING.forEach((p,i) => { if(packingState[i]===undefined) packingState[i]=false; });
+  const plist = document.getElementById('packingList');
+  plist.innerHTML = PACKING.map((p,i) => `
+    <div class="packing-item ${packingState[i]?'done':''}" onclick="togglePacking(${i})">
+      <span class="packing-check">${packingState[i]?'✓':'○'}</span>${p}
+    </div>
+  `).join('');
+
+  // Warnings
+  const wlist = document.getElementById('warningList');
+  wlist.innerHTML = WARNINGS.map(w => `
+    <div class="warning-item">
+      <span class="warning-icon">⚠️</span>
+      <span class="warning-text">${w}</span>
+    </div>
+  `).join('');
+}
+
+function toggleTodo(i) {
+  todoState[i] = !todoState[i];
+  renderTodos();
+}
+function togglePacking(i) {
+  packingState[i] = !packingState[i];
+  renderTodos();
+}
+function updateProgress() {
+  const done = Object.values(todoState).filter(Boolean).length;
+  const total = TODOS.length;
+  const pct = Math.round(done/total*100);
+  const pw = document.getElementById('progressWrap');
+  const pb = document.getElementById('progressBar');
+  const pl = document.getElementById('progressLabel');
+  pw.innerHTML = `<div class="progress-bar" style="width:${pct}%"></div>`;
+  pl.textContent = `${done}/${total} 완료 (${pct}%)`;
+}
+
+/* ── RENDER PREP ── */
+function renderPrep() {
+  const list = document.getElementById('prepList');
+  list.innerHTML = PREP.map(p => `
+    <div class="prep-item">
+      <span class="prep-city">${p.city}</span>
+      <span class="prep-text">${p.text}</span>
+    </div>
+  `).join('');
+}
+
+/* ── NAV ── */
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+/* ── INIT ── */
+renderSchedule();
+renderBudget();
+renderTrains();
+renderTodos();
+renderPrep();
+fetchExchange();
+fetchWeather();
+// Refresh exchange every 5 minutes
+setInterval(fetchExchange, 300000);
+</script>
+</body>
+</html>
