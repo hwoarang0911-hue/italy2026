@@ -692,17 +692,31 @@ const CITY_COORDS = [
 async function fetchWeather() {
   const grid = document.getElementById('weatherGrid');
   grid.innerHTML = '';
+
+  const today = new Date();
+  const tripStart = new Date('2026-05-22');
+  const daysUntilTrip = Math.ceil((tripStart - today) / (1000 * 60 * 60 * 24));
+  const useForecast = daysUntilTrip <= 16;
+
+  const apiBase = useForecast
+    ? 'https://api.open-meteo.com/v1/forecast'
+    : 'https://archive-api.open-meteo.com/v1/archive';
+  const startDate = useForecast ? '2026-05-22' : '2025-05-22';
+  const endDate   = useForecast ? '2026-06-02' : '2025-06-02';
+
   try {
     for (const city of CITY_COORDS) {
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,sunrise,sunset&timezone=Europe%2FRome&start_date=2026-05-22&end_date=2026-06-02`;
+      const url = `${apiBase}?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,sunrise,sunset&timezone=Europe%2FRome&start_date=${startDate}&end_date=${endDate}`;
       const res = await fetch(url);
       const data = await res.json();
       const daily = data.daily;
+      if (!daily) continue;
 
       for (let i = 0; i < daily.time.length; i++) {
-        const dateStr = daily.time[i]; // 2026-05-22
-        const mmdd = dateStr.slice(5).replace('-','/'); // 05/22
-        const mmddShort = mmdd.replace(/^0/,''); // 5/22
+        const dateStr = daily.time[i];
+        // archive returns 2025-MM-DD, forecast returns 2026-MM-DD — normalise to MM/DD
+        const mmdd = dateStr.slice(5).replace('-','/');
+        const mmddShort = mmdd.replace(/^0/,'');
 
         const matchDate = city.dates.some(d => {
           const nd = d.replace('5/','05/').replace('6/','06/');
@@ -713,15 +727,15 @@ async function fetchWeather() {
         const tmax = daily.temperature_2m_max[i];
         const tmin = daily.temperature_2m_min[i];
         const wc = daily.weathercode[i];
-        const sunrise = daily.sunrise[i]?.slice(11,16);
-        const sunset = daily.sunset[i]?.slice(11,16);
+        const sunrise = daily.sunrise?.[i]?.slice(11,16);
+        const sunset  = daily.sunset?.[i]?.slice(11,16);
 
         const {icon, desc} = wcToEmoji(wc);
 
         const card = document.createElement('div');
         card.className = 'weather-card';
         card.innerHTML = `
-          <div class="weather-date">${city.dates[0] === mmddShort || city.dates.includes(mmddShort) ? mmddShort : mmddShort}</div>
+          <div class="weather-date">${mmddShort}</div>
           <div class="weather-city">${city.name}</div>
           <div class="weather-main">
             <span class="weather-icon">${icon}</span>
@@ -738,7 +752,14 @@ async function fetchWeather() {
         grid.appendChild(card);
       }
     }
-    if (!grid.children.length) grid.innerHTML = '<div class="weather-loading">날씨 데이터가 없습니다</div>';
+    if (!grid.children.length) {
+      grid.innerHTML = '<div class="weather-loading">날씨 데이터가 없습니다</div>';
+    } else if (!useForecast) {
+      const note = document.createElement('p');
+      note.style.cssText = 'grid-column:1/-1;text-align:center;font-size:0.78rem;color:#888;margin:4px 0 0;';
+      note.textContent = '📅 출발 16일 전부터 실제 예보로 자동 전환됩니다 (현재: 2025년 같은 기간 실측치)';
+      grid.appendChild(note);
+    }
   } catch(e) {
     grid.innerHTML = '<div class="weather-loading">⚠️ 날씨를 불러올 수 없습니다<br><small>인터넷 연결을 확인해 주세요</small></div>';
   }
