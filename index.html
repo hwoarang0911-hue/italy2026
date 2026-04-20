@@ -86,16 +86,13 @@ body::before {
   display:flex; align-items:center; gap:10px;
   flex-wrap:wrap;
 }
-.exchange-label { font-size:0.65rem; color:var(--gold-light); letter-spacing:0.1em; flex-shrink:0; }
-.exchange-rates { display:flex; gap:14px; flex:1; flex-wrap:wrap; }
-.exchange-item {
-  display:flex; align-items:baseline; gap:4px;
-}
-.exchange-curr { font-size:0.65rem; color:rgba(255,255,255,0.5); }
-.exchange-val { font-size:0.92rem; font-weight:700; color:#FFF8F0; }
-.exchange-sub { font-size:0.6rem; color:rgba(255,255,255,0.4); }
-.exchange-time { font-size:0.58rem; color:rgba(255,255,255,0.3); margin-left:auto; }
-.exchange-loading { font-size:0.72rem; color:rgba(255,255,255,0.5); }
+.exchange-label { font-size:0.65rem; color:var(--gold-light); letter-spacing:0.1em; flex-shrink:0; font-family:'Noto Sans KR',sans-serif; }
+.exchange-rates { display:flex; gap:14px; flex:1; flex-wrap:wrap; align-items:baseline; }
+.exchange-item { display:flex; align-items:baseline; gap:5px; font-family:'Noto Sans KR',sans-serif; }
+.exchange-curr { font-size:0.7rem; color:rgba(255,255,255,0.5); font-weight:400; }
+.exchange-val { font-size:1rem; font-weight:700; color:#FFF8F0; letter-spacing:-0.01em; }
+.exchange-time { font-size:0.58rem; color:rgba(255,255,255,0.3); margin-left:auto; font-family:'Noto Sans KR',sans-serif; }
+.exchange-loading { font-size:0.72rem; color:rgba(255,255,255,0.5); font-family:'Noto Sans KR',sans-serif; }
 
 /* ── NAV TABS ── */
 .nav-wrap {
@@ -163,28 +160,31 @@ body::before {
 }
 
 /* ── WEATHER ── */
-.weather-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.weather-grid { display:flex; flex-direction:column; gap:6px; }
 .weather-card {
   background: white;
-  border-radius:12px;
-  padding:12px;
+  border-radius:10px;
+  padding:10px 14px;
   border:1px solid var(--border);
   box-shadow:var(--shadow);
+  display:flex; align-items:center; gap:12px;
+  font-family:'Noto Sans KR', sans-serif;
 }
-.weather-date { font-size:0.65rem; color:var(--muted); margin-bottom:2px; }
+.weather-date {
+  font-size:0.7rem; color:var(--muted); min-width:28px; flex-shrink:0;
+}
 .weather-city {
   font-weight:700; font-size:0.82rem; color:var(--ink);
-  margin-bottom:6px;
+  min-width:52px; flex-shrink:0;
 }
-.weather-main { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
-.weather-icon { font-size:1.6rem; }
-.weather-temp { font-size:1.2rem; font-weight:700; color:var(--terracotta); }
-.weather-desc { font-size:0.65rem; color:var(--muted); }
+.weather-icon { font-size:1.4rem; flex-shrink:0; }
+.weather-temp { font-size:0.92rem; font-weight:700; color:var(--terracotta); white-space:nowrap; }
+.weather-desc { font-size:0.65rem; color:var(--muted); white-space:nowrap; }
+.weather-main { display:flex; align-items:center; gap:6px; flex:1; }
 .weather-detail {
-  display:grid; grid-template-columns:1fr 1fr; gap:4px;
-  border-top:1px solid var(--border); padding-top:6px;
+  display:flex; gap:10px; flex-shrink:0;
 }
-.wd-item { font-size:0.62rem; color:var(--ink-soft); }
+.wd-item { font-size:0.62rem; color:var(--ink-soft); white-space:nowrap; }
 .wd-label { color:var(--muted); }
 .weather-loading {
   text-align:center; padding:30px; color:var(--muted); font-size:0.8rem;
@@ -722,9 +722,31 @@ async function fetchWeather() {
     return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
   }
 
+  // 앙상블은 sunrise/sunset 미지원 → 별도 forecast API로 가져옴
+  const sunTimes = {};
+  if (mode === 'ensemble') {
+    try {
+      const sunUrl = `https://api.open-meteo.com/v1/forecast?latitude=41.9028&longitude=12.4964&daily=sunrise,sunset&timezone=Europe%2FRome&start_date=2026-05-22&end_date=2026-06-02&forecast_days=16`;
+      const sunRes = await fetch(sunUrl);
+      const sunData = await sunRes.json();
+      if (sunData.daily?.time) {
+        sunData.daily.time.forEach((t, i) => {
+          sunTimes[t] = {
+            sunrise: sunData.daily.sunrise[i]?.slice(11,16),
+            sunset:  sunData.daily.sunset[i]?.slice(11,16),
+          };
+        });
+      }
+    } catch(_) {}
+  }
+
   try {
     for (const city of CITY_COORDS) {
-      const params = `latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,sunrise,sunset&timezone=Europe%2FRome&start_date=${startDate}&end_date=${endDate}`;
+      // 앙상블은 sunrise/sunset 요청 제외
+      const dailyVars = mode === 'ensemble'
+        ? 'temperature_2m_max,temperature_2m_min,weathercode'
+        : 'temperature_2m_max,temperature_2m_min,weathercode,sunrise,sunset';
+      const params = `latitude=${city.lat}&longitude=${city.lon}&daily=${dailyVars}&timezone=Europe%2FRome&start_date=${startDate}&end_date=${endDate}`;
       const url = mode === 'ensemble'
         ? `${apiBase}?${params}&models=icon_seamless`
         : `${apiBase}?${params}`;
@@ -747,8 +769,11 @@ async function fetchWeather() {
         const tmax = ensembleMean(daily, 'temperature_2m_max', i);
         const tmin = ensembleMean(daily, 'temperature_2m_min', i);
         const wc   = ensembleMean(daily, 'weathercode', i);
-        const sunrise = daily.sunrise?.[i]?.slice(11,16);
-        const sunset  = daily.sunset?.[i]?.slice(11,16);
+
+        // 일출/일몰: forecast·archive는 직접, ensemble은 별도 fetch한 값
+        const sunKey = mode === 'ensemble' ? `2026-${mmdd.replace('/','-')}` : dateStr;
+        const sunrise = sunTimes[sunKey]?.sunrise ?? daily.sunrise?.[i]?.slice(11,16);
+        const sunset  = sunTimes[sunKey]?.sunset  ?? daily.sunset?.[i]?.slice(11,16);
 
         const {icon, desc} = wcToEmoji(Math.round(wc));
 
@@ -757,12 +782,10 @@ async function fetchWeather() {
         card.innerHTML = `
           <div class="weather-date">${mmddShort}</div>
           <div class="weather-city">${city.name}</div>
+          <span class="weather-icon">${icon}</span>
           <div class="weather-main">
-            <span class="weather-icon">${icon}</span>
-            <div>
-              <div class="weather-temp">${Math.round(tmax)}° / ${Math.round(tmin)}°</div>
-              <div class="weather-desc">${desc}</div>
-            </div>
+            <div class="weather-temp">${Math.round(tmax)}° / ${Math.round(tmin)}°</div>
+            <div class="weather-desc">${desc}</div>
           </div>
           <div class="weather-detail">
             <div class="wd-item"><span class="wd-label">일출 </span>${sunrise||'-'}</div>
@@ -782,12 +805,12 @@ async function fetchWeather() {
       grid.innerHTML = '<div class="weather-loading">날씨 데이터가 없습니다</div>';
     } else if (noteText) {
       const note = document.createElement('p');
-      note.style.cssText = 'grid-column:1/-1;text-align:center;font-size:0.78rem;color:#888;margin:4px 0 0;';
+      note.style.cssText = 'text-align:center;font-size:0.78rem;color:#888;margin:4px 0 0;';
       note.textContent = noteText;
       grid.appendChild(note);
     }
   } catch(e) {
-    grid.innerHTML = '<div class="weather-loading">⚠️ 날씨를 불러올 수 없습니다<br><small>인터넷 연결을 확인해 주세요</small></div>';
+    grid.innerHTML = `<div class="weather-loading">⚠️ 날씨를 불러올 수 없습니다<br><small>${e.message}</small></div>`;
   }
 }
 
@@ -809,19 +832,11 @@ async function fetchExchange() {
     const res = await fetch('https://open.er-api.com/v6/latest/EUR');
     const data = await res.json();
     const krw = data.rates.KRW;
-    const usd = data.rates.USD;
 
     document.getElementById('exchangeRates').innerHTML = `
       <div class="exchange-item">
-        <span class="exchange-curr">EUR</span>
+        <span class="exchange-curr">1 EUR</span>
         <span class="exchange-val">₩${Math.round(krw).toLocaleString()}</span>
-      </div>
-      <div class="exchange-item">
-        <span class="exchange-curr">USD</span>
-        <span class="exchange-val">₩${Math.round(krw/usd).toLocaleString()}</span>
-      </div>
-      <div class="exchange-item" style="color:var(--gold-light);font-size:0.7rem;">
-        100EUR = ₩${Math.round(krw*100/1000)*100 >= 1000 ? (Math.round(krw*100/100)).toLocaleString() : Math.round(krw*100).toLocaleString()}
       </div>
     `;
     const now = new Date();
