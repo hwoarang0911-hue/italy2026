@@ -696,17 +696,38 @@ async function fetchWeather() {
   const today = new Date();
   const tripStart = new Date('2026-05-22');
   const daysUntilTrip = Math.ceil((tripStart - today) / (1000 * 60 * 60 * 24));
-  const useForecast = daysUntilTrip <= 16;
 
-  const apiBase = useForecast
-    ? 'https://api.open-meteo.com/v1/forecast'
-    : 'https://archive-api.open-meteo.com/v1/archive';
-  const startDate = useForecast ? '2026-05-22' : '2025-05-22';
-  const endDate   = useForecast ? '2026-06-02' : '2025-06-02';
+  // 3-tier: ≤16일 → 고정밀 예보, ≤35일 → 앙상블 예보(최대 35일), 그 외 → 작년 실측
+  let mode, apiBase, startDate, endDate;
+  if (daysUntilTrip <= 16) {
+    mode = 'forecast';
+    apiBase = 'https://api.open-meteo.com/v1/forecast';
+    startDate = '2026-05-22'; endDate = '2026-06-02';
+  } else if (daysUntilTrip <= 35) {
+    mode = 'ensemble';
+    apiBase = 'https://ensemble-api.open-meteo.com/v1/ensemble';
+    startDate = '2026-05-22'; endDate = '2026-06-02';
+  } else {
+    mode = 'archive';
+    apiBase = 'https://archive-api.open-meteo.com/v1/archive';
+    startDate = '2025-05-22'; endDate = '2025-06-02';
+  }
+
+  // 앙상블 응답에서 member 키들의 평균값 반환
+  function ensembleMean(daily, varName, idx) {
+    if (Array.isArray(daily[varName])) return daily[varName][idx];
+    const keys = Object.keys(daily).filter(k => k.startsWith(varName + '_member'));
+    if (!keys.length) return null;
+    const vals = keys.map(k => daily[k][idx]).filter(v => v != null);
+    return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+  }
 
   try {
     for (const city of CITY_COORDS) {
-      const url = `${apiBase}?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,sunrise,sunset&timezone=Europe%2FRome&start_date=${startDate}&end_date=${endDate}`;
+      const params = `latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,sunrise,sunset&timezone=Europe%2FRome&start_date=${startDate}&end_date=${endDate}`;
+      const url = mode === 'ensemble'
+        ? `${apiBase}?${params}&models=icon_seamless`
+        : `${apiBase}?${params}`;
       const res = await fetch(url);
       const data = await res.json();
       const daily = data.daily;
@@ -714,7 +735,6 @@ async function fetchWeather() {
 
       for (let i = 0; i < daily.time.length; i++) {
         const dateStr = daily.time[i];
-        // archive returns 2025-MM-DD, forecast returns 2026-MM-DD — normalise to MM/DD
         const mmdd = dateStr.slice(5).replace('-','/');
         const mmddShort = mmdd.replace(/^0/,'');
 
@@ -724,13 +744,13 @@ async function fetchWeather() {
         });
         if (!matchDate) continue;
 
-        const tmax = daily.temperature_2m_max[i];
-        const tmin = daily.temperature_2m_min[i];
-        const wc = daily.weathercode[i];
+        const tmax = ensembleMean(daily, 'temperature_2m_max', i);
+        const tmin = ensembleMean(daily, 'temperature_2m_min', i);
+        const wc   = ensembleMean(daily, 'weathercode', i);
         const sunrise = daily.sunrise?.[i]?.slice(11,16);
         const sunset  = daily.sunset?.[i]?.slice(11,16);
 
-        const {icon, desc} = wcToEmoji(wc);
+        const {icon, desc} = wcToEmoji(Math.round(wc));
 
         const card = document.createElement('div');
         card.className = 'weather-card';
@@ -752,12 +772,18 @@ async function fetchWeather() {
         grid.appendChild(card);
       }
     }
+
+    const noteText = {
+      ensemble: '🌐 앙상블 예보 기준 (출발 16일 전부터 고정밀 예보로 전환)',
+      archive:  '📅 출발 35일 전부터 실제 예보로 자동 전환됩니다 (현재: 2025년 같은 기간 실측치)',
+    }[mode];
+
     if (!grid.children.length) {
       grid.innerHTML = '<div class="weather-loading">날씨 데이터가 없습니다</div>';
-    } else if (!useForecast) {
+    } else if (noteText) {
       const note = document.createElement('p');
       note.style.cssText = 'grid-column:1/-1;text-align:center;font-size:0.78rem;color:#888;margin:4px 0 0;';
-      note.textContent = '📅 출발 16일 전부터 실제 예보로 자동 전환됩니다 (현재: 2025년 같은 기간 실측치)';
+      note.textContent = noteText;
       grid.appendChild(note);
     }
   } catch(e) {
