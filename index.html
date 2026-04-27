@@ -697,59 +697,15 @@ async function fetchWeather() {
   const tripStart = new Date('2026-05-22');
   const daysUntilTrip = Math.ceil((tripStart - today) / (1000 * 60 * 60 * 24));
 
-  // 3-tier: ≤16일 → 고정밀 예보, ≤35일 → 앙상블 예보(최대 35일), 그 외 → 작년 실측
-  let mode, apiBase, startDate, endDate;
-  if (daysUntilTrip <= 16) {
-    mode = 'forecast';
-    apiBase = 'https://api.open-meteo.com/v1/forecast';
-    startDate = '2026-05-22'; endDate = '2026-06-02';
-  } else if (daysUntilTrip <= 35) {
-    mode = 'ensemble';
-    apiBase = 'https://ensemble-api.open-meteo.com/v1/ensemble';
-    startDate = '2026-05-22'; endDate = '2026-06-02';
-  } else {
-    mode = 'archive';
-    apiBase = 'https://archive-api.open-meteo.com/v1/archive';
-    startDate = '2025-05-22'; endDate = '2025-06-02';
-  }
-
-  // 앙상블 응답에서 member 키들의 평균값 반환
-  function ensembleMean(daily, varName, idx) {
-    if (Array.isArray(daily[varName])) return daily[varName][idx];
-    const keys = Object.keys(daily).filter(k => k.startsWith(varName + '_member'));
-    if (!keys.length) return null;
-    const vals = keys.map(k => daily[k][idx]).filter(v => v != null);
-    return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
-  }
-
-  // 앙상블은 sunrise/sunset 미지원 → 별도 forecast API로 가져옴
-  const sunTimes = {};
-  if (mode === 'ensemble') {
-    try {
-      const sunUrl = `https://api.open-meteo.com/v1/forecast?latitude=41.9028&longitude=12.4964&daily=sunrise,sunset&timezone=Europe%2FRome&start_date=2026-05-22&end_date=2026-06-02&forecast_days=16`;
-      const sunRes = await fetch(sunUrl);
-      const sunData = await sunRes.json();
-      if (sunData.daily?.time) {
-        sunData.daily.time.forEach((t, i) => {
-          sunTimes[t] = {
-            sunrise: sunData.daily.sunrise[i]?.slice(11,16),
-            sunset:  sunData.daily.sunset[i]?.slice(11,16),
-          };
-        });
-      }
-    } catch(_) {}
-  }
+  const useForecast = daysUntilTrip <= 16;
+  const apiBase  = useForecast ? 'https://api.open-meteo.com/v1/forecast'
+                               : 'https://archive-api.open-meteo.com/v1/archive';
+  const startDate = useForecast ? '2026-05-22' : '2025-05-22';
+  const endDate   = useForecast ? '2026-06-02' : '2025-06-02';
 
   try {
     for (const city of CITY_COORDS) {
-      // 앙상블은 weathercode/sunrise/sunset 미지원 → precipitation으로 대체
-      const dailyVars = mode === 'ensemble'
-        ? 'temperature_2m_max,temperature_2m_min,precipitation_sum,snowfall_sum'
-        : 'temperature_2m_max,temperature_2m_min,weathercode,sunrise,sunset';
-      const params = `latitude=${city.lat}&longitude=${city.lon}&daily=${dailyVars}&timezone=Europe%2FRome&start_date=${startDate}&end_date=${endDate}`;
-      const url = mode === 'ensemble'
-        ? `${apiBase}?${params}&models=icon_seamless`
-        : `${apiBase}?${params}`;
+      const url = `${apiBase}?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,sunrise,sunset&timezone=Europe%2FRome&start_date=${startDate}&end_date=${endDate}`;
       const res = await fetch(url);
       const data = await res.json();
       const daily = data.daily;
@@ -757,36 +713,21 @@ async function fetchWeather() {
 
       for (let i = 0; i < daily.time.length; i++) {
         const dateStr = daily.time[i];
-        const mmdd = dateStr.slice(5).replace('-','/');
-        const mmddShort = mmdd.replace(/^0/,'');
+        const mmdd = dateStr.slice(5).replace('-', '/');
+        const mmddShort = mmdd.replace(/^0/, '');
 
         const matchDate = city.dates.some(d => {
-          const nd = d.replace('5/','05/').replace('6/','06/');
+          const nd = d.replace('5/', '05/').replace('6/', '06/');
           return nd === mmdd || d === mmddShort;
         });
         if (!matchDate) continue;
 
-        const tmax = ensembleMean(daily, 'temperature_2m_max', i);
-        const tmin = ensembleMean(daily, 'temperature_2m_min', i);
-
-        let icon, desc;
-        if (mode === 'ensemble') {
-          const precip = ensembleMean(daily, 'precipitation_sum', i) ?? 0;
-          const snow   = ensembleMean(daily, 'snowfall_sum', i) ?? 0;
-          if (snow > 0)        { icon='🌨️'; desc='눈'; }
-          else if (precip>=10) { icon='🌧️'; desc='비'; }
-          else if (precip>=2)  { icon='🌦️'; desc='이슬비'; }
-          else if (precip>0)   { icon='🌦️'; desc='약한 비'; }
-          else                 { icon='☀️'; desc='맑음'; }
-        } else {
-          const wc = daily.weathercode?.[i] ?? daily.weather_code?.[i] ?? 0;
-          ({icon, desc} = wcToEmoji(wc));
-        }
-
-        // 일출/일몰: forecast·archive는 직접, ensemble은 별도 fetch한 값
-        const sunKey = mode === 'ensemble' ? `2026-${mmdd.replace('/','-')}` : dateStr;
-        const sunrise = sunTimes[sunKey]?.sunrise ?? daily.sunrise?.[i]?.slice(11,16);
-        const sunset  = sunTimes[sunKey]?.sunset  ?? daily.sunset?.[i]?.slice(11,16);
+        const tmax    = daily.temperature_2m_max[i];
+        const tmin    = daily.temperature_2m_min[i];
+        const wc      = daily.weathercode[i] ?? 0;
+        const sunrise = daily.sunrise?.[i]?.slice(11, 16);
+        const sunset  = daily.sunset?.[i]?.slice(11, 16);
+        const {icon, desc} = wcToEmoji(wc);
 
         const card = document.createElement('div');
         card.className = 'weather-card';
@@ -807,17 +748,12 @@ async function fetchWeather() {
       }
     }
 
-    const noteText = {
-      ensemble: '🌐 앙상블 예보 기준 (출발 16일 전부터 고정밀 예보로 전환)',
-      archive:  '📅 출발 35일 전부터 실제 예보로 자동 전환됩니다 (현재: 2025년 같은 기간 실측치)',
-    }[mode];
-
     if (!grid.children.length) {
       grid.innerHTML = '<div class="weather-loading">날씨 데이터가 없습니다</div>';
-    } else if (noteText) {
+    } else if (!useForecast) {
       const note = document.createElement('p');
       note.style.cssText = 'text-align:center;font-size:0.78rem;color:#888;margin:4px 0 0;';
-      note.textContent = noteText;
+      note.textContent = '📅 출발 16일 전부터 실제 예보로 전환됩니다 (현재: 2025년 같은 기간 실측치)';
       grid.appendChild(note);
     }
   } catch(e) {
