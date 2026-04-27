@@ -193,7 +193,7 @@ body::before {
 /* ── SCHEDULE ── */
 .day-block { margin-bottom:12px; }
 .day-header {
-  display:flex; align-items:center; gap:8px;
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
   padding: 10px 14px;
   background: linear-gradient(135deg, var(--terracotta), var(--terra-dark));
   border-radius: 10px 10px 0 0;
@@ -742,9 +742,9 @@ async function fetchWeather() {
 
   try {
     for (const city of CITY_COORDS) {
-      // 앙상블은 sunrise/sunset 요청 제외
+      // 앙상블은 weathercode/sunrise/sunset 미지원 → precipitation으로 대체
       const dailyVars = mode === 'ensemble'
-        ? 'temperature_2m_max,temperature_2m_min,weathercode'
+        ? 'temperature_2m_max,temperature_2m_min,precipitation_sum,snowfall_sum'
         : 'temperature_2m_max,temperature_2m_min,weathercode,sunrise,sunset';
       const params = `latitude=${city.lat}&longitude=${city.lon}&daily=${dailyVars}&timezone=Europe%2FRome&start_date=${startDate}&end_date=${endDate}`;
       const url = mode === 'ensemble'
@@ -768,14 +768,25 @@ async function fetchWeather() {
 
         const tmax = ensembleMean(daily, 'temperature_2m_max', i);
         const tmin = ensembleMean(daily, 'temperature_2m_min', i);
-        const wc   = ensembleMean(daily, 'weathercode', i);
+
+        let icon, desc;
+        if (mode === 'ensemble') {
+          const precip = ensembleMean(daily, 'precipitation_sum', i) ?? 0;
+          const snow   = ensembleMean(daily, 'snowfall_sum', i) ?? 0;
+          if (snow > 0)        { icon='🌨️'; desc='눈'; }
+          else if (precip>=10) { icon='🌧️'; desc='비'; }
+          else if (precip>=2)  { icon='🌦️'; desc='이슬비'; }
+          else if (precip>0)   { icon='🌦️'; desc='약한 비'; }
+          else                 { icon='☀️'; desc='맑음'; }
+        } else {
+          const wc = daily.weathercode?.[i] ?? daily.weather_code?.[i] ?? 0;
+          ({icon, desc} = wcToEmoji(wc));
+        }
 
         // 일출/일몰: forecast·archive는 직접, ensemble은 별도 fetch한 값
         const sunKey = mode === 'ensemble' ? `2026-${mmdd.replace('/','-')}` : dateStr;
         const sunrise = sunTimes[sunKey]?.sunrise ?? daily.sunrise?.[i]?.slice(11,16);
         const sunset  = sunTimes[sunKey]?.sunset  ?? daily.sunset?.[i]?.slice(11,16);
-
-        const {icon, desc} = wcToEmoji(Math.round(wc));
 
         const card = document.createElement('div');
         card.className = 'weather-card';
