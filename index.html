@@ -186,6 +186,7 @@ body::before {
 }
 .wd-item { font-size:0.62rem; color:var(--ink-soft); white-space:nowrap; }
 .wd-label { color:var(--muted); }
+.weather-rain { font-size:0.65rem; color:#4A90D9; margin-left:5px; font-weight:600; }
 .weather-loading {
   text-align:center; padding:30px; color:var(--muted); font-size:0.8rem;
 }
@@ -681,12 +682,15 @@ const PREP = [
 
 /* ── WEATHER API ── */
 const CITY_COORDS = [
-  { name:'로마', lat:41.9028, lon:12.4964, dates:['5/22','5/23','5/24','5/25'] },
-  { name:'피렌체', lat:43.7696, lon:11.2558, dates:['5/25','5/26'] },
+  { name:'로마',     lat:41.9028, lon:12.4964, dates:['5/22','5/23','5/24','5/25'] },
+  { name:'피렌체',   lat:43.7696, lon:11.2558, dates:['5/25','5/26'] },
+  { name:'피사',     lat:43.7228, lon:10.4017, dates:['5/26'] },
   { name:'베네치아', lat:45.4408, lon:12.3155, dates:['5/27'] },
-  { name:'돌로미티', lat:46.5396, lon:12.1357, dates:['5/28','5/29'] },
-  { name:'토리노', lat:45.0703, lon:7.6869, dates:['5/30','5/31','6/1'] },
-  { name:'밀라노', lat:45.4642, lon:9.1900, dates:['6/2'] },
+  { name:'오르티세이',lat:46.5746, lon:11.6711, dates:['5/28','5/29'] },
+  { name:'베로나',   lat:45.4384, lon:10.9916, dates:['5/30'] },
+  { name:'바롤로',   lat:44.6109, lon:7.9417,  dates:['5/31'] },
+  { name:'토리노',   lat:45.0703, lon:7.6869,  dates:['6/1'] },
+  { name:'밀라노',   lat:45.4642, lon:9.1900,  dates:['6/2'] },
 ];
 
 async function fetchWeather() {
@@ -698,14 +702,18 @@ async function fetchWeather() {
   const daysUntilTrip = Math.ceil((tripStart - today) / (1000 * 60 * 60 * 24));
 
   const useForecast = daysUntilTrip <= 16;
-  const apiBase  = useForecast ? 'https://api.open-meteo.com/v1/forecast'
-                               : 'https://archive-api.open-meteo.com/v1/archive';
+  const apiBase   = useForecast ? 'https://api.open-meteo.com/v1/forecast'
+                                : 'https://archive-api.open-meteo.com/v1/archive';
   const startDate = useForecast ? '2026-05-22' : '2025-05-22';
   const endDate   = useForecast ? '2026-06-02' : '2025-06-02';
+  // forecast는 강수확률 제공, archive는 강수량만 제공
+  const dailyVars = useForecast
+    ? 'temperature_2m_max,temperature_2m_min,weathercode,precipitation_probability_max'
+    : 'temperature_2m_max,temperature_2m_min,weathercode,precipitation_sum';
 
   try {
     for (const city of CITY_COORDS) {
-      const url = `${apiBase}?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,sunrise,sunset&timezone=Europe%2FRome&start_date=${startDate}&end_date=${endDate}`;
+      const url = `${apiBase}?latitude=${city.lat}&longitude=${city.lon}&daily=${dailyVars}&timezone=Europe%2FRome&start_date=${startDate}&end_date=${endDate}`;
       const res = await fetch(url);
       const data = await res.json();
       const daily = data.daily;
@@ -722,12 +730,20 @@ async function fetchWeather() {
         });
         if (!matchDate) continue;
 
-        const tmax    = daily.temperature_2m_max[i];
-        const tmin    = daily.temperature_2m_min[i];
-        const wc      = daily.weathercode[i] ?? 0;
-        const sunrise = daily.sunrise?.[i]?.slice(11, 16);
-        const sunset  = daily.sunset?.[i]?.slice(11, 16);
+        const tmax = daily.temperature_2m_max[i];
+        const tmin = daily.temperature_2m_min[i];
+        const wc   = daily.weathercode[i] ?? 0;
         const {icon, desc} = wcToEmoji(wc);
+
+        // 강수확률(forecast) 또는 강수량(archive)으로 비 표시 결정
+        const rainProb = daily.precipitation_probability_max?.[i];
+        const rainSum  = daily.precipitation_sum?.[i];
+        let rainHtml = '';
+        if (rainProb != null && rainProb >= 20) {
+          rainHtml = `<span class="weather-rain">💧${rainProb}%</span>`;
+        } else if (rainSum != null && rainSum >= 1) {
+          rainHtml = `<span class="weather-rain">💧${rainSum.toFixed(1)}mm</span>`;
+        }
 
         const card = document.createElement('div');
         card.className = 'weather-card';
@@ -737,11 +753,7 @@ async function fetchWeather() {
           <span class="weather-icon">${icon}</span>
           <div class="weather-main">
             <div class="weather-temp">${Math.round(tmax)}° / ${Math.round(tmin)}°</div>
-            <div class="weather-desc">${desc}</div>
-          </div>
-          <div class="weather-detail">
-            <div class="wd-item"><span class="wd-label">일출 </span>${sunrise||'-'}</div>
-            <div class="wd-item"><span class="wd-label">일몰 </span>${sunset||'-'}</div>
+            <div class="weather-desc">${desc}${rainHtml}</div>
           </div>
         `;
         grid.appendChild(card);
