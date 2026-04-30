@@ -693,6 +693,23 @@ const CITY_COORDS = [
   { name:'밀라노',   lat:45.4642, lon:9.1900,  dates:['6/2'] },
 ];
 
+// Aeronautica Militare · ECMWF · world-weather.info 기반 예측치
+// (출발 16일 전부터 Open-Meteo 실시간 예보로 자동 전환)
+const WEATHER_ESTIMATES = [
+  { date:'5/22', city:'로마',       tmax:26, tmin:17, icon:'⛅', desc:'구름 조금',   rain:null },
+  { date:'5/23', city:'로마',       tmax:26, tmin:19, icon:'⛅', desc:'구름 조금',   rain:null },
+  { date:'5/24', city:'로마',       tmax:27, tmin:19, icon:'🌤', desc:'대체로 맑음', rain:null },
+  { date:'5/25', city:'로마·피렌체', tmax:26, tmin:16, icon:'🌤', desc:'대체로 맑음', rain:null },
+  { date:'5/26', city:'피사·피렌체', tmax:23, tmin:14, icon:'☀️', desc:'맑음',       rain:null },
+  { date:'5/27', city:'베네치아',   tmax:22, tmin:16, icon:'⛅', desc:'구름 많음',   rain:30   },
+  { date:'5/28', city:'오르티세이', tmax:15, tmin:5,  icon:'🌦️', desc:'소나기',     rain:55   },
+  { date:'5/29', city:'오르티세이', tmax:15, tmin:5,  icon:'🌦️', desc:'소나기',     rain:55   },
+  { date:'5/30', city:'베로나',     tmax:24, tmin:13, icon:'⛅', desc:'구름 많음',   rain:38   },
+  { date:'5/31', city:'바롤로',     tmax:22, tmin:12, icon:'🌦️', desc:'소나기 위험', rain:43   },
+  { date:'6/1',  city:'토리노',     tmax:23, tmin:12, icon:'⛅', desc:'구름 많음',   rain:32   },
+  { date:'6/2',  city:'밀라노',     tmax:26, tmin:17, icon:'🌤', desc:'대체로 맑음', rain:27   },
+];
+
 async function fetchWeather() {
   const grid = document.getElementById('weatherGrid');
   grid.innerHTML = '';
@@ -701,19 +718,34 @@ async function fetchWeather() {
   const tripStart = new Date('2026-05-22');
   const daysUntilTrip = Math.ceil((tripStart - today) / (1000 * 60 * 60 * 24));
 
-  const useForecast = daysUntilTrip <= 16;
-  const apiBase   = useForecast ? 'https://api.open-meteo.com/v1/forecast'
-                                : 'https://archive-api.open-meteo.com/v1/archive';
-  const startDate = useForecast ? '2026-05-22' : '2025-05-22';
-  const endDate   = useForecast ? '2026-06-02' : '2025-06-02';
-  // forecast는 강수확률 제공, archive는 강수량만 제공
-  const dailyVars = useForecast
-    ? 'temperature_2m_max,temperature_2m_min,weathercode,precipitation_probability_max'
-    : 'temperature_2m_max,temperature_2m_min,weathercode,precipitation_sum';
+  // 아직 예보 범위 밖(>16일): 연구 기반 예측치 표시
+  if (daysUntilTrip > 16) {
+    WEATHER_ESTIMATES.forEach(e => {
+      const rainHtml = e.rain != null ? `<span class="weather-rain">💧${e.rain}%</span>` : '';
+      const card = document.createElement('div');
+      card.className = 'weather-card';
+      card.innerHTML = `
+        <div class="weather-date">${e.date}</div>
+        <div class="weather-city">${e.city}</div>
+        <span class="weather-icon">${e.icon}</span>
+        <div class="weather-main">
+          <div class="weather-temp">${e.tmax}° / ${e.tmin}°</div>
+          <div class="weather-desc">${e.desc}${rainHtml}</div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+    const note = document.createElement('p');
+    note.style.cssText = 'text-align:center;font-size:0.72rem;color:#888;margin:6px 0 0;';
+    note.textContent = '📊 Aeronautica Militare · ECMWF · world-weather.info 기반 예측 · 5/6부터 실시간 예보로 자동 전환';
+    grid.appendChild(note);
+    return;
+  }
 
+  // 출발 16일 이내: Open-Meteo 실시간 예보
   try {
     for (const city of CITY_COORDS) {
-      const url = `${apiBase}?latitude=${city.lat}&longitude=${city.lon}&daily=${dailyVars}&timezone=Europe%2FRome&start_date=${startDate}&end_date=${endDate}`;
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_probability_max&timezone=Europe%2FRome&start_date=2026-05-22&end_date=2026-06-02`;
       const res = await fetch(url);
       const data = await res.json();
       const daily = data.daily;
@@ -730,20 +762,12 @@ async function fetchWeather() {
         });
         if (!matchDate) continue;
 
-        const tmax = daily.temperature_2m_max[i];
-        const tmin = daily.temperature_2m_min[i];
-        const wc   = daily.weathercode[i] ?? 0;
-        const {icon, desc} = wcToEmoji(wc);
-
-        // 강수확률(forecast) 또는 강수량(archive)으로 비 표시 결정
+        const tmax     = daily.temperature_2m_max[i];
+        const tmin     = daily.temperature_2m_min[i];
+        const wc       = daily.weathercode[i] ?? 0;
         const rainProb = daily.precipitation_probability_max?.[i];
-        const rainSum  = daily.precipitation_sum?.[i];
-        let rainHtml = '';
-        if (rainProb != null && rainProb >= 20) {
-          rainHtml = `<span class="weather-rain">💧${rainProb}%</span>`;
-        } else if (rainSum != null && rainSum >= 1) {
-          rainHtml = `<span class="weather-rain">💧${rainSum.toFixed(1)}mm</span>`;
-        }
+        const {icon, desc} = wcToEmoji(wc);
+        const rainHtml = rainProb >= 20 ? `<span class="weather-rain">💧${rainProb}%</span>` : '';
 
         const card = document.createElement('div');
         card.className = 'weather-card';
@@ -759,15 +783,8 @@ async function fetchWeather() {
         grid.appendChild(card);
       }
     }
-
-    if (!grid.children.length) {
+    if (!grid.children.length)
       grid.innerHTML = '<div class="weather-loading">날씨 데이터가 없습니다</div>';
-    } else if (!useForecast) {
-      const note = document.createElement('p');
-      note.style.cssText = 'text-align:center;font-size:0.78rem;color:#888;margin:4px 0 0;';
-      note.textContent = '📅 출발 16일 전부터 실제 예보로 전환됩니다 (현재: 2025년 같은 기간 실측치)';
-      grid.appendChild(note);
-    }
   } catch(e) {
     grid.innerHTML = `<div class="weather-loading">⚠️ 날씨를 불러올 수 없습니다<br><small>${e.message}</small></div>`;
   }
