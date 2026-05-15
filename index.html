@@ -718,13 +718,71 @@ async function fetchWeather() {
   const tripStart = new Date('2026-05-22');
   const daysUntilTrip = Math.ceil((tripStart - today) / (1000 * 60 * 60 * 24));
 
-  // 아직 예보 범위 밖(>16일): 연구 기반 예측치 표시
-  if (daysUntilTrip > 16) {
-    WEATHER_ESTIMATES.forEach(e => {
+  // API로 가져온 카드 저장 (날짜 키)
+  const apiCards = {};
+
+  if (daysUntilTrip <= 16) {
+    // 16일 예보 범위 안에 있는 마지막 날짜 계산
+    const maxForecast = new Date(today);
+    maxForecast.setDate(maxForecast.getDate() + 16);
+    const apiEnd = maxForecast < new Date('2026-06-02')
+      ? maxForecast.toISOString().slice(0, 10)
+      : '2026-06-02';
+
+    try {
+      for (const city of CITY_COORDS) {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_probability_max&timezone=Europe%2FRome&start_date=2026-05-22&end_date=${apiEnd}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const daily = data.daily;
+        if (!daily) continue;
+
+        for (let i = 0; i < daily.time.length; i++) {
+          const dateStr = daily.time[i];
+          const mmdd = dateStr.slice(5).replace('-', '/');
+          const mmddShort = mmdd.replace(/^0/, '');
+
+          const matchDate = city.dates.some(d => {
+            const nd = d.replace('5/', '05/').replace('6/', '06/');
+            return nd === mmdd || d === mmddShort;
+          });
+          if (!matchDate) continue;
+
+          const tmax     = daily.temperature_2m_max[i];
+          const tmin     = daily.temperature_2m_min[i];
+          const wc       = daily.weathercode[i] ?? 0;
+          const rainProb = daily.precipitation_probability_max?.[i] ?? 0;
+          const {icon, desc} = wcToEmoji(wc);
+          const rainHtml = rainProb >= 20 ? `<span class="weather-rain">💧${rainProb}%</span>` : '';
+
+          const div = document.createElement('div');
+          div.className = 'weather-card';
+          div.innerHTML = `
+            <div class="weather-date">${mmddShort}</div>
+            <div class="weather-city">${city.name}</div>
+            <span class="weather-icon">${icon}</span>
+            <div class="weather-main">
+              <div class="weather-temp">${Math.round(tmax)}° / ${Math.round(tmin)}°</div>
+              <div class="weather-desc">${desc}${rainHtml}</div>
+            </div>
+          `;
+          apiCards[mmddShort] = div;
+        }
+      }
+    } catch(_) {}
+  }
+
+  // 날짜 순서대로 렌더: API 데이터 있으면 우선, 없으면 예측치
+  let usedEstimate = false;
+  WEATHER_ESTIMATES.forEach(e => {
+    if (apiCards[e.date]) {
+      grid.appendChild(apiCards[e.date]);
+    } else {
+      usedEstimate = true;
       const rainHtml = e.rain != null ? `<span class="weather-rain">💧${e.rain}%</span>` : '';
-      const card = document.createElement('div');
-      card.className = 'weather-card';
-      card.innerHTML = `
+      const div = document.createElement('div');
+      div.className = 'weather-card';
+      div.innerHTML = `
         <div class="weather-date">${e.date}</div>
         <div class="weather-city">${e.city}</div>
         <span class="weather-icon">${e.icon}</span>
@@ -733,61 +791,19 @@ async function fetchWeather() {
           <div class="weather-desc">${e.desc}${rainHtml}</div>
         </div>
       `;
-      grid.appendChild(card);
-    });
-    const note = document.createElement('p');
-    note.style.cssText = 'text-align:center;font-size:0.72rem;color:#888;margin:6px 0 0;';
-    note.textContent = '📊 Aeronautica Militare · ECMWF · world-weather.info 기반 예측 · 5/6부터 실시간 예보로 자동 전환';
-    grid.appendChild(note);
-    return;
-  }
-
-  // 출발 16일 이내: Open-Meteo 실시간 예보
-  try {
-    for (const city of CITY_COORDS) {
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_probability_max&timezone=Europe%2FRome&start_date=2026-05-22&end_date=2026-06-02`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const daily = data.daily;
-      if (!daily) continue;
-
-      for (let i = 0; i < daily.time.length; i++) {
-        const dateStr = daily.time[i];
-        const mmdd = dateStr.slice(5).replace('-', '/');
-        const mmddShort = mmdd.replace(/^0/, '');
-
-        const matchDate = city.dates.some(d => {
-          const nd = d.replace('5/', '05/').replace('6/', '06/');
-          return nd === mmdd || d === mmddShort;
-        });
-        if (!matchDate) continue;
-
-        const tmax     = daily.temperature_2m_max[i];
-        const tmin     = daily.temperature_2m_min[i];
-        const wc       = daily.weathercode[i] ?? 0;
-        const rainProb = daily.precipitation_probability_max?.[i];
-        const {icon, desc} = wcToEmoji(wc);
-        const rainHtml = rainProb >= 20 ? `<span class="weather-rain">💧${rainProb}%</span>` : '';
-
-        const card = document.createElement('div');
-        card.className = 'weather-card';
-        card.innerHTML = `
-          <div class="weather-date">${mmddShort}</div>
-          <div class="weather-city">${city.name}</div>
-          <span class="weather-icon">${icon}</span>
-          <div class="weather-main">
-            <div class="weather-temp">${Math.round(tmax)}° / ${Math.round(tmin)}°</div>
-            <div class="weather-desc">${desc}${rainHtml}</div>
-          </div>
-        `;
-        grid.appendChild(card);
-      }
+      grid.appendChild(div);
     }
-    if (!grid.children.length)
-      grid.innerHTML = '<div class="weather-loading">날씨 데이터가 없습니다</div>';
-  } catch(e) {
-    grid.innerHTML = `<div class="weather-loading">⚠️ 날씨를 불러올 수 없습니다<br><small>${e.message}</small></div>`;
-  }
+  });
+
+  const apiCount = Object.keys(apiCards).length;
+  const note = document.createElement('p');
+  note.style.cssText = 'text-align:center;font-size:0.72rem;color:#888;margin:6px 0 0;';
+  note.textContent = apiCount > 0 && usedEstimate
+    ? `🌐 실시간 예보(${apiCount}일) + 📊 ECMWF 예측치 혼합`
+    : apiCount > 0
+      ? '🌐 Open-Meteo 실시간 예보'
+      : '📊 Aeronautica Militare · ECMWF · world-weather.info 기반 예측';
+  grid.appendChild(note);
 }
 
 function wcToEmoji(wc) {
