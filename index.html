@@ -686,9 +686,12 @@ const CITY_COORDS = [
   { name:'피렌체',   lat:43.7696, lon:11.2558, dates:['5/25','5/26'] },
   { name:'피사',     lat:43.7228, lon:10.4017, dates:['5/26'] },
   { name:'베네치아', lat:45.4408, lon:12.3155, dates:['5/27'] },
-  { name:'오르티세이',lat:46.5746, lon:11.6711, dates:['5/28','5/29'] },
+  { name:'담페초',   lat:46.5362, lon:12.1354, dates:['5/28'] },
+  { name:'오르티세이',lat:46.5746, lon:11.6711, dates:['5/29'] },
+  { name:'인스부르크',lat:47.2692, lon:11.4041, dates:['5/29'] },
   { name:'베로나',   lat:45.4384, lon:10.9916, dates:['5/30'] },
   { name:'바롤로',   lat:44.6109, lon:7.9417,  dates:['5/31'] },
+  { name:'체루비나', lat:44.6200, lon:7.9600,  dates:['5/31'] },
   { name:'토리노',   lat:45.0703, lon:7.6869,  dates:['6/1'] },
   { name:'밀라노',   lat:45.4642, lon:9.1900,  dates:['6/2'] },
 ];
@@ -696,18 +699,20 @@ const CITY_COORDS = [
 // Aeronautica Militare · ECMWF · world-weather.info 기반 예측치
 // (출발 16일 전부터 Open-Meteo 실시간 예보로 자동 전환)
 const WEATHER_ESTIMATES = [
-  { date:'5/22', city:'로마',       tmax:26, tmin:17, icon:'⛅', desc:'구름 조금',   rain:null },
-  { date:'5/23', city:'로마',       tmax:26, tmin:19, icon:'⛅', desc:'구름 조금',   rain:null },
-  { date:'5/24', city:'로마',       tmax:27, tmin:19, icon:'🌤', desc:'대체로 맑음', rain:null },
-  { date:'5/25', city:'로마·피렌체', tmax:26, tmin:16, icon:'🌤', desc:'대체로 맑음', rain:null },
-  { date:'5/26', city:'피사·피렌체', tmax:23, tmin:14, icon:'☀️', desc:'맑음',       rain:null },
-  { date:'5/27', city:'베네치아',   tmax:22, tmin:16, icon:'⛅', desc:'구름 많음',   rain:30   },
-  { date:'5/28', city:'오르티세이', tmax:15, tmin:5,  icon:'🌦️', desc:'소나기',     rain:55   },
-  { date:'5/29', city:'오르티세이', tmax:15, tmin:5,  icon:'🌦️', desc:'소나기',     rain:55   },
-  { date:'5/30', city:'베로나',     tmax:24, tmin:13, icon:'⛅', desc:'구름 많음',   rain:38   },
+  { date:'5/22', city:'로마',       tmax:26, tmin:17, icon:'⛅',  desc:'구름 조금',   rain:null },
+  { date:'5/23', city:'로마',       tmax:26, tmin:19, icon:'⛅',  desc:'구름 조금',   rain:null },
+  { date:'5/24', city:'로마',       tmax:27, tmin:19, icon:'🌤',  desc:'대체로 맑음', rain:null },
+  { date:'5/25', city:'로마·피렌체', tmax:26, tmin:16, icon:'🌤',  desc:'대체로 맑음', rain:null },
+  { date:'5/26', city:'피사·피렌체', tmax:23, tmin:14, icon:'☀️', desc:'맑음',        rain:null },
+  { date:'5/27', city:'베네치아',   tmax:22, tmin:16, icon:'⛅',  desc:'구름 많음',   rain:30   },
+  { date:'5/28', city:'담페초',     tmax:14, tmin:4,  icon:'🌦️', desc:'소나기',      rain:55   },
+  { date:'5/29', city:'오르티세이', tmax:15, tmin:5,  icon:'🌦️', desc:'소나기',      rain:55   },
+  { date:'5/29', city:'인스부르크', tmax:20, tmin:10, icon:'⛅',  desc:'구름 조금',   rain:28   },
+  { date:'5/30', city:'베로나',     tmax:24, tmin:13, icon:'⛅',  desc:'구름 많음',   rain:38   },
   { date:'5/31', city:'바롤로',     tmax:22, tmin:12, icon:'🌦️', desc:'소나기 위험', rain:43   },
-  { date:'6/1',  city:'토리노',     tmax:23, tmin:12, icon:'⛅', desc:'구름 많음',   rain:32   },
-  { date:'6/2',  city:'밀라노',     tmax:26, tmin:17, icon:'🌤', desc:'대체로 맑음', rain:27   },
+  { date:'5/31', city:'체루비나',   tmax:22, tmin:12, icon:'🌦️', desc:'소나기 위험', rain:43   },
+  { date:'6/1',  city:'토리노',     tmax:23, tmin:12, icon:'⛅',  desc:'구름 많음',   rain:32   },
+  { date:'6/2',  city:'밀라노',     tmax:26, tmin:17, icon:'🌤',  desc:'대체로 맑음', rain:27   },
 ];
 
 async function fetchWeather() {
@@ -766,7 +771,7 @@ async function fetchWeather() {
               <div class="weather-desc">${desc}${rainHtml}</div>
             </div>
           `;
-          apiCards[mmddShort] = div;
+          apiCards[mmddShort + '|' + city.name] = div;
         }
       }
     } catch(_) {}
@@ -775,8 +780,9 @@ async function fetchWeather() {
   // 날짜 순서대로 렌더: API 데이터 있으면 우선, 없으면 예측치
   let usedEstimate = false;
   WEATHER_ESTIMATES.forEach(e => {
-    if (apiCards[e.date]) {
-      grid.appendChild(apiCards[e.date]);
+    const key = e.date + '|' + e.city;
+    if (apiCards[key]) {
+      grid.appendChild(apiCards[key]);
     } else {
       usedEstimate = true;
       const rainHtml = e.rain != null ? `<span class="weather-rain">💧${e.rain}%</span>` : '';
