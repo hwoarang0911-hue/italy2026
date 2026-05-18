@@ -442,8 +442,8 @@ body::before {
   <div class="budget-total">
     <div>
       <div class="bt-label">총 예상 지출</div>
-      <div class="bt-amount">₩8,237,450</div>
-      <div class="bt-sub">기본 예산 ₩5,500,000 대비 +₩2,737,450</div>
+      <div class="bt-amount" id="btAmount">₩10,675,750</div>
+      <div class="bt-sub" id="btSub">기본 예산 ₩5,500,000 대비 +₩5,175,750</div>
     </div>
     <div style="font-size:2rem">📊</div>
   </div>
@@ -467,7 +467,7 @@ body::before {
       <div class="hotel-price">₩462,300</div>
     </div>
     <div class="hotel-row">
-      <div><div class="hotel-name">돌로미티 2박 (취소 가능)</div><div class="hotel-info">5/28~5/30 · 호텔스 · 조식미포함 · 현지 11EUR · 무료주차</div></div>
+      <div><div class="hotel-name">돌로미티 2박 · Smart hotel Saslong</div><div class="hotel-info">5/28~5/30 · 호텔스 · 조식포함 · 현지 11EUR 별도 · 무료주차</div></div>
       <div class="hotel-price">₩740,000</div>
     </div>
     <div class="hotel-row">
@@ -538,18 +538,21 @@ const SCHEDULE = [
   ], note:'아이 레오나르도 익스프레스 무료'},
   { date:'5/23(토)', city:'로마', hotel:'Best Western Globus Hotel', hotelInfo:'조식포함', items:[
     {time:'아침', content:'호텔 조식', tag:'food'},
-    {time:'오전', content:'콜로세움 · 포로 로마노 · 캄파돌리오 광장 · 비토리오 2세 기념관', tag:'tour'},
-    {time:'오후', content:'판테온 · 나보나 광장 · 캄포 데 피오리 · 콜로세움 야경', tag:'tour'},
-  ], note:'판테온 예약제 / 클룩으로 콜로세움 줄 따로'},
+    {time:'오전', content:'트레비 분수 · 스페인 계단 · (콘도티 거리 쇼핑)', tag:'tour'},
+    {time:'점심', content:'점심식사', tag:'food'},
+    {time:'15:00', content:'바티칸 박물관 (15:00) · 성 베드로 대성당 · 젤라또 · 천사의 성', tag:'tour'},
+    {time:'저녁', content:'콜로세움 야경 (옵션)', tag:'tour'},
+  ], note:'판테온 현금/카드 줄 따로'},
   { date:'5/24(일)', city:'로마', hotel:'Best Western Globus Hotel', hotelInfo:'조식포함', items:[
-    {time:'아침', content:'호텔 조식', tag:'food'},
-    {time:'오전', content:'트레비 분수 · 스페인 계단 · 콘도티거리 · 판초언덕', tag:'tour'},
-    {time:'오후', content:'진실의 입 · 트라스테베레 · 벼룩시장 (포르타 포르테세)', tag:'tour'},
-    {time:'옵션', content:'나폴리 또는 티볼리 당일치기', tag:'tour'},
-  ], note:''},
+    {time:'07:30', content:'지하철/버스: 티볼리 이동 (Mb → 버스, 1시간)', tag:'train'},
+    {time:'09:00~12:00', content:'티볼리 빌라 데스테 관광 · 점심식사', tag:'tour'},
+    {time:'12:42', content:'기차: 티볼리→로마 복귀 (12:42, 1시간)', tag:'train'},
+    {time:'15:10', content:'콜로세움 (15:10) · 포로 로마노 · 캄파돌리오 언덕 · 진실의 입', tag:'tour'},
+  ], note:'기차 예약 필요 (로마↔티볼리 왕복)'},
   { date:'5/25(월)', city:'로마→피렌체', hotel:'Hotel Delle Nazioni', hotelInfo:'조식포함', items:[
     {time:'아침', content:'호텔 조식', tag:'food'},
-    {time:'오전', content:'바티칸 박물관 · 젤라또 · 천사의 성 · 나보나광장', tag:'tour'},
+    {time:'오전', content:'판테온 · (타짜도로·지올리띠·산 유스타키오 커피) · 나보나 광장 · 캄포 데 피오리', tag:'tour'},
+    {time:'점심', content:'점심식사', tag:'food'},
     {time:'16:35', content:'기차: 로마→피렌체 (16:35→18:11, 1h 36m)', tag:'train'},
     {time:'저녁', content:'피렌체 체크인 / 저녁식사 (ZaZa)', tag:'food'},
   ], note:'기차 결제완'},
@@ -568,14 +571,14 @@ const SCHEDULE = [
     {time:'저녁', content:'산 마르코 광장 · 두칼레 궁전 · 탄식의 다리', tag:'tour'},
     {time:'저녁', content:'저녁식사', tag:'food'},
   ], note:'기차 결제완 / 곤돌라: 낮 90EUR, 밤 110EUR (30분)'},
-  { date:'5/28(목)', city:'돌로미티', hotel:'Isarcus Residence / Smart hotel Saslong', hotelInfo:'조식미포함', items:[
+  { date:'5/28(목)', city:'돌로미티', hotel:'Smart hotel Saslong', hotelInfo:'조식포함', items:[
     {time:'아침', content:'바포레토로 이동', tag:'tour'},
     {time:'09:00', content:'렌트카 대여 · 마트 장보기 (먹을거, 피크닉)', tag:'tour'},
     {time:'오전', content:'운전: 베네치아→코르티나 담페초 (2~2.5시간)', tag:'tour'},
     {time:'오후', content:'돌로미티 동부: 코르티나 담페초 · 라가주오이 · 친퀘토리 · 브라이에스 호수', tag:'tour'},
     {time:'저녁', content:'저녁식사', tag:'food'},
   ], note:'주차장 예약 필요 / 렌트카 사무소 동선 확인'},
-  { date:'5/29(금)', city:'돌로미티', hotel:'Isarcus Residence / Smart hotel Saslong', hotelInfo:'조식미포함', items:[
+  { date:'5/29(금)', city:'돌로미티', hotel:'Smart hotel Saslong', hotelInfo:'조식포함', items:[
     {time:'오전', content:'돌로미티 서부: 오르티세이 · 카레짜 호수 · 세체다 (예약필요!)', tag:'tour'},
     {time:'옵션', content:'인스부르크 (슈니첼 등)', tag:'tour'},
     {time:'저녁', content:'저녁식사', tag:'food'},
@@ -588,6 +591,7 @@ const SCHEDULE = [
     {time:'저녁', content:'운전: 몬차→토리노 (2.5시간) · 체크인', tag:'hotel'},
   ], note:'몬차 레이싱 티켓 사전 구매 필요'},
   { date:'5/31(일)', city:'알바·바롤로·브라', hotel:'Agora Boutique Stays', hotelInfo:'조식미포함', items:[
+    {time:'오전 옵션', content:'체르비니아 Cervino Ski Paradise (Breuil-Cervinia ↔ 체르마트)', tag:'tour'},
     {time:'오전', content:'바롤로 와이너리 방문', tag:'tour'},
     {time:'점심', content:'브라에서 점심식사', tag:'food'},
     {time:'오후', content:'알바 트러플 시장', tag:'tour'},
@@ -599,7 +603,7 @@ const SCHEDULE = [
     {time:'점심', content:'점심식사 · 디저트', tag:'food'},
     {time:'오후', content:'토리노 시내 관광', tag:'tour'},
     {time:'저녁', content:'저녁식사', tag:'food'},
-  ], note:''},
+  ], note:'이집트 박물관 오전만 운영 (월요일)'},
   { date:'6/2(화)', city:'밀라노·출국', hotel:'-', hotelInfo:'', items:[
     {time:'08:54', content:'기차: 토리노→밀라노 (08:54→10:45, 1h 51m)', tag:'train'},
     {time:'오전', content:'밀라노 두오모 · 리나센테 · 기타 관광', tag:'tour'},
@@ -614,9 +618,14 @@ const BUDGET = [
   { icon:'🏨', name:'호텔 (11박)', amount:4199300, note:'평균 1박 ₩381,755', max:5500000 },
   { icon:'🚂', name:'기차', amount:410000, note:'8개 구간', max:5500000 },
   { icon:'🚗', name:'렌트카', amount:1135750, note:'현장결제 648.93EUR', max:5500000 },
+  { icon:'🚌', name:'교통비', amount:200000, note:'버스·지하철', max:5500000 },
   { icon:'⛽', name:'톨비·유류비·주차', amount:300000, note:'', max:5500000 },
-  { icon:'🛡️', name:'여행자보험', amount:100000, note:'', max:5500000 },
+  { icon:'🎫', name:'입장료 (돌로미티)', amount:600000, note:'케이블카·주요 명소', max:5500000 },
+  { icon:'🎫', name:'입장료 (로마)', amount:155000, note:'바티칸·콜로세움', max:5500000 },
+  { icon:'📱', name:'통신요금', amount:44300, note:'오렌지 프랑스 이심1·유심2', max:5500000 },
+  { icon:'🛡️', name:'여행자보험', amount:39000, note:'삼성화재', max:5500000 },
   { icon:'🏙️', name:'도시세', amount:190400, note:'112EUR', max:5500000 },
+  { icon:'🍽️', name:'식비', amount:1500000, note:'', max:5500000 },
 ];
 
 const TRAINS = [
@@ -918,6 +927,10 @@ function toggleDay(el) {
 /* ── RENDER BUDGET ── */
 function renderBudget() {
   const total = BUDGET.reduce((s,b) => s+b.amount, 0);
+  const btAmount = document.getElementById('btAmount');
+  const btSub = document.getElementById('btSub');
+  if (btAmount) btAmount.textContent = '₩' + total.toLocaleString();
+  if (btSub) btSub.textContent = `기본 예산 ₩5,500,000 대비 +₩${(total - 5500000).toLocaleString()}`;
   const list = document.getElementById('budgetList');
   list.innerHTML = BUDGET.map(b => `
     <div class="budget-row">
