@@ -441,7 +441,7 @@ a.hero-date-chip:hover { background: rgba(255,255,255,0.38); }
     <span class="hero-date-chip">🏨 11박</span>
     <span class="hero-date-chip">🚂 기차 8회</span>
     <span class="hero-date-chip">🚗 렌트 4일</span>
-    <a class="hero-date-chip" href="https://docs.google.com/spreadsheets/d/1fuqEWuNbFXs3ORSrsdzc3ULJZtLnn7ub/edit" target="_blank" rel="noopener">📋 여행계획서 ↗</a>
+    <a class="hero-date-chip" href="https://docs.google.com/spreadsheets/d/1fuqEWuNbFXs3ORSrsdzc3ULJZtLnn7ub/edit" onclick="window.open('https://docs.google.com/spreadsheets/d/1fuqEWuNbFXs3ORSrsdzc3ULJZtLnn7ub/edit','_blank');return false;">📋 여행계획서 ↗</a>
   </div>
 </div>
 
@@ -1236,30 +1236,30 @@ function renderPrep() {
 
 /* ── GUIDE RENDER ── */
 const GUIDE_IMGS = {
-  'Colosseum':               'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Colosseo_2020.jpg/1200px-Colosseo_2020.jpg',
-  'Pantheon, Rome':          'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Pantheon_Rome_2011.jpg/1200px-Pantheon_Rome_2011.jpg',
-  'Trevi Fountain':          'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Fontana_di_Trevi_-_Roma.jpg/1200px-Fontana_di_Trevi_-_Roma.jpg',
-  "St. Peter's Basilica":    'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg/1200px-Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg',
-  "Castel Sant'Angelo":      'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Castel_Sant%27Angelo_from_bridge_with_angels.jpg/1200px-Castel_Sant%27Angelo_from_bridge_with_angels.jpg',
-  "Villa d'Este, Tivoli":    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Tivoli_-_Villa_d%27Este_(Fontana_dell%27Organo).jpg/1200px-Tivoli_-_Villa_d%27Este_(Fontana_dell%27Organo).jpg",
-  'Florence Cathedral':      'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Cattedrale_di_Santa_Maria_del_Fiore_-_facade_-_Sept_2017.jpg/1200px-Cattedrale_di_Santa_Maria_del_Fiore_-_facade_-_Sept_2017.jpg',
-  'Ponte Vecchio':           'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Ponte_vecchio_al_tramonto.jpg/1200px-Ponte_vecchio_al_tramonto.jpg',
-  'Leaning Tower of Pisa':   'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Leaning_tower_of_pisa_2.jpg/1200px-Leaning_tower_of_pisa_2.jpg',
-  'Bridge of Sighs':         'https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Ponte_dei_Sospiri.jpg/1200px-Ponte_dei_Sospiri.jpg',
-  'Dolomites':               'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Tre_Cime_di_Lavaredo_e_Auronzo.jpg/1200px-Tre_Cime_di_Lavaredo_e_Auronzo.jpg',
-  'Arena di Verona':         'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Arena_di_Verona.jpg/1200px-Arena_di_Verona.jpg',
-  'Egyptian Museum, Turin':  'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Egyptian_Museum%2C_Turin.jpg/1200px-Egyptian_Museum%2C_Turin.jpg',
-  'Milan Cathedral':         'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Milan_Cathedral_from_Piazza_del_Duomo.jpg/1200px-Milan_Cathedral_from_Piazza_del_Duomo.jpg',
+  'Colosseum':             'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Colosseum_in_Rome-April_2007-1-_copie_2B.jpg/1200px-Colosseum_in_Rome-April_2007-1-_copie_2B.jpg',
+  'Pantheon, Rome':        'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/The_Pantheon_in_Rome%2C_Italy.jpg/1200px-The_Pantheon_in_Rome%2C_Italy.jpg',
+  'Trevi Fountain':        'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Fontana_di_Trevi_-_Roma.jpg/1200px-Fontana_di_Trevi_-_Roma.jpg',
+  "St. Peter's Basilica":  'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg/1200px-Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg',
+  "Castel Sant'Angelo":    'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Castel_Sant%27Angelo_from_bridge_with_angels.jpg/1200px-Castel_Sant%27Angelo_from_bridge_with_angels.jpg',
+  "Villa d'Este, Tivoli":  'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Villa_d%27Este_-_Tivoli_-_Fountain_of_the_Organ.jpg/1200px-Villa_d%27Este_-_Tivoli_-_Fountain_of_the_Organ.jpg',
+  'Florence Cathedral':    'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Cattedrale_di_Santa_Maria_del_Fiore_-_facade_-_Sept_2017.jpg/1200px-Cattedrale_di_Santa_Maria_del_Fiore_-_facade_-_Sept_2017.jpg',
+  'Ponte Vecchio':         'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Ponte_Vecchio_%28Firenze%29.jpg/1200px-Ponte_Vecchio_%28Firenze%29.jpg',
+  'Leaning Tower of Pisa': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Leaning_tower_of_pisa_2.jpg/1200px-Leaning_tower_of_pisa_2.jpg',
+  'Bridge of Sighs':       'https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Ponte_dei_Sospiri.jpg/1200px-Ponte_dei_Sospiri.jpg',
+  'Dolomites':             'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Tre_Cime_di_Lavaredo_e_Auronzo.jpg/1200px-Tre_Cime_di_Lavaredo_e_Auronzo.jpg',
+  'Arena di Verona':       'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Arena_di_Verona.jpg/1200px-Arena_di_Verona.jpg',
+  'Egyptian Museum, Turin':'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Turin_Egizio_-_Sala_dei_sarcofagi.jpg/1200px-Turin_Egizio_-_Sala_dei_sarcofagi.jpg',
+  'Milan Cathedral':       'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Duomo_di_Milano_dalla_terrazza.jpg/1200px-Duomo_di_Milano_dalla_terrazza.jpg',
 };
 
 function renderGuide() {
   const container = document.getElementById('guideList');
-  container.innerHTML = GUIDE.map((g, gi) => `
+  container.innerHTML = GUIDE.map(g => `
     <div class="guide-city-header">${g.city}</div>
-    ${g.sites.map((s, si) => `
+    ${g.sites.map(s => `
       <div class="guide-card">
         <div class="guide-img-wrap">
-          <img id="gimg-${gi}-${si}" class="guide-img" src="${GUIDE_IMGS[s.wiki]||''}" alt="${s.title}" loading="lazy"
+          <img class="guide-img" src="${GUIDE_IMGS[s.wiki]||''}" alt="${s.title}" loading="lazy"
                onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
           <div class="guide-img-fallback" style="display:none">${s.imgFb}</div>
         </div>
@@ -1275,32 +1275,6 @@ function renderGuide() {
       </div>
     `).join('')}
   `).join('');
-
-  // Wikipedia REST API로 고화질 대표 사진 로딩 (Wikimedia URL 실패 시 업그레이드)
-  GUIDE.forEach((g, gi) => {
-    g.sites.forEach((s, si) => {
-      const imgEl = document.getElementById(`gimg-${gi}-${si}`);
-      if (!imgEl) return;
-      fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(s.wiki)}`)
-        .then(r => r.ok ? r.json() : Promise.reject())
-        .then(data => {
-          let src = data.thumbnail?.source;
-          if (src) src = src.replace(/\/\d+px-/, '/1200px-');
-          else src = data.originalimage?.source;
-          if (src) {
-            const tmp = new Image();
-            tmp.onload = () => {
-              imgEl.src = src;
-              imgEl.style.display = '';
-              const fb = imgEl.nextElementSibling;
-              if (fb) fb.style.display = 'none';
-            };
-            tmp.src = src;
-          }
-        })
-        .catch(() => {});
-    });
-  });
 }
 
 /* ── NAV ── */
