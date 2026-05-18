@@ -441,7 +441,7 @@ a.hero-date-chip:hover { background: rgba(255,255,255,0.38); }
     <span class="hero-date-chip">🏨 11박</span>
     <span class="hero-date-chip">🚂 기차 8회</span>
     <span class="hero-date-chip">🚗 렌트 4일</span>
-    <a class="hero-date-chip" href="https://docs.google.com/spreadsheets/d/1fuqEWuNbFXs3ORSrsdzc3ULJZtLnn7ub/edit?usp=drivesdk&ouid=106527489624114361188&rtpof=true&sd=true" target="_blank" rel="noopener">📋 여행계획서 ↗</a>
+    <a class="hero-date-chip" href="https://docs.google.com/spreadsheets/d/1fuqEWuNbFXs3ORSrsdzc3ULJZtLnn7ub/edit" target="_blank" rel="noopener">📋 여행계획서 ↗</a>
   </div>
 </div>
 
@@ -1254,30 +1254,53 @@ const GUIDE_IMGS = {
 
 function renderGuide() {
   const container = document.getElementById('guideList');
-  container.innerHTML = GUIDE.map(g => `
+  container.innerHTML = GUIDE.map((g, gi) => `
     <div class="guide-city-header">${g.city}</div>
-    ${g.sites.map(s => {
-      const src = GUIDE_IMGS[s.wiki] || '';
-      return `
-        <div class="guide-card">
-          <div class="guide-img-wrap">
-            <img class="guide-img" src="${src}" alt="${s.title}" loading="lazy"
-                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-            <div class="guide-img-fallback" style="display:none">${s.imgFb}</div>
-          </div>
-          <div class="guide-body">
-            <div class="guide-title">${s.emoji} ${s.title}</div>
-            <div class="guide-title-en">${s.titleEn}</div>
-            <span class="guide-age">📅 ${s.built}</span>
-            <div class="guide-facts">
-              ${s.facts.map(f => `<div class="guide-fact"><span class="guide-fact-icon">${f.i}</span><span>${f.t}</span></div>`).join('')}
-            </div>
-            <div class="guide-wow"><span class="guide-wow-label">💡 재미있는 사실!</span> ${s.wow}</div>
-          </div>
+    ${g.sites.map((s, si) => `
+      <div class="guide-card">
+        <div class="guide-img-wrap">
+          <img id="gimg-${gi}-${si}" class="guide-img" src="${GUIDE_IMGS[s.wiki]||''}" alt="${s.title}" loading="lazy"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="guide-img-fallback" style="display:none">${s.imgFb}</div>
         </div>
-      `;
-    }).join('')}
+        <div class="guide-body">
+          <div class="guide-title">${s.emoji} ${s.title}</div>
+          <div class="guide-title-en">${s.titleEn}</div>
+          <span class="guide-age">📅 ${s.built}</span>
+          <div class="guide-facts">
+            ${s.facts.map(f => `<div class="guide-fact"><span class="guide-fact-icon">${f.i}</span><span>${f.t}</span></div>`).join('')}
+          </div>
+          <div class="guide-wow"><span class="guide-wow-label">💡 재미있는 사실!</span> ${s.wow}</div>
+        </div>
+      </div>
+    `).join('')}
   `).join('');
+
+  // Wikipedia REST API로 고화질 대표 사진 로딩 (Wikimedia URL 실패 시 업그레이드)
+  GUIDE.forEach((g, gi) => {
+    g.sites.forEach((s, si) => {
+      const imgEl = document.getElementById(`gimg-${gi}-${si}`);
+      if (!imgEl) return;
+      fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(s.wiki)}`)
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => {
+          let src = data.thumbnail?.source;
+          if (src) src = src.replace(/\/\d+px-/, '/1200px-');
+          else src = data.originalimage?.source;
+          if (src) {
+            const tmp = new Image();
+            tmp.onload = () => {
+              imgEl.src = src;
+              imgEl.style.display = '';
+              const fb = imgEl.nextElementSibling;
+              if (fb) fb.style.display = 'none';
+            };
+            tmp.src = src;
+          }
+        })
+        .catch(() => {});
+    });
+  });
 }
 
 /* ── NAV ── */
