@@ -1235,52 +1235,49 @@ function renderPrep() {
 }
 
 /* ── GUIDE RENDER ── */
+const GUIDE_IMGS = {
+  'Colosseum':               'https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Colosseo_2020.jpg/1200px-Colosseo_2020.jpg',
+  'Pantheon, Rome':          'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Pantheon_Rome_2011.jpg/1200px-Pantheon_Rome_2011.jpg',
+  'Trevi Fountain':          'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Fontana_di_Trevi_-_Roma.jpg/1200px-Fontana_di_Trevi_-_Roma.jpg',
+  "St. Peter's Basilica":    'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg/1200px-Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg',
+  "Castel Sant'Angelo":      'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Castel_Sant%27Angelo_from_bridge_with_angels.jpg/1200px-Castel_Sant%27Angelo_from_bridge_with_angels.jpg',
+  "Villa d'Este, Tivoli":    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Tivoli_-_Villa_d%27Este_(Fontana_dell%27Organo).jpg/1200px-Tivoli_-_Villa_d%27Este_(Fontana_dell%27Organo).jpg",
+  'Florence Cathedral':      'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Cattedrale_di_Santa_Maria_del_Fiore_-_facade_-_Sept_2017.jpg/1200px-Cattedrale_di_Santa_Maria_del_Fiore_-_facade_-_Sept_2017.jpg',
+  'Ponte Vecchio':           'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Ponte_vecchio_al_tramonto.jpg/1200px-Ponte_vecchio_al_tramonto.jpg',
+  'Leaning Tower of Pisa':   'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Leaning_tower_of_pisa_2.jpg/1200px-Leaning_tower_of_pisa_2.jpg',
+  'Bridge of Sighs':         'https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Ponte_dei_Sospiri.jpg/1200px-Ponte_dei_Sospiri.jpg',
+  'Dolomites':               'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Tre_Cime_di_Lavaredo_e_Auronzo.jpg/1200px-Tre_Cime_di_Lavaredo_e_Auronzo.jpg',
+  'Arena di Verona':         'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Arena_di_Verona.jpg/1200px-Arena_di_Verona.jpg',
+  'Egyptian Museum, Turin':  'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Egyptian_Museum%2C_Turin.jpg/1200px-Egyptian_Museum%2C_Turin.jpg',
+  'Milan Cathedral':         'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Milan_Cathedral_from_Piazza_del_Duomo.jpg/1200px-Milan_Cathedral_from_Piazza_del_Duomo.jpg',
+};
+
 function renderGuide() {
   const container = document.getElementById('guideList');
-  container.innerHTML = GUIDE.map((g, gi) => `
+  container.innerHTML = GUIDE.map(g => `
     <div class="guide-city-header">${g.city}</div>
-    ${g.sites.map((s, si) => `
-      <div class="guide-card">
-        <div class="guide-img-wrap">
-          <img id="gimg-${gi}-${si}" class="guide-img" src="" alt="${s.title}" loading="lazy" style="display:none">
-          <div class="guide-img-fallback" id="gfb-${gi}-${si}">${s.imgFb}</div>
-        </div>
-        <div class="guide-body">
-          <div class="guide-title">${s.emoji} ${s.title}</div>
-          <div class="guide-title-en">${s.titleEn}</div>
-          <span class="guide-age">📅 ${s.built}</span>
-          <div class="guide-facts">
-            ${s.facts.map(f => `<div class="guide-fact"><span class="guide-fact-icon">${f.i}</span><span>${f.t}</span></div>`).join('')}
+    ${g.sites.map(s => {
+      const src = GUIDE_IMGS[s.wiki] || '';
+      return `
+        <div class="guide-card">
+          <div class="guide-img-wrap">
+            <img class="guide-img" src="${src}" alt="${s.title}" loading="lazy"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="guide-img-fallback" style="display:none">${s.imgFb}</div>
           </div>
-          <div class="guide-wow"><span class="guide-wow-label">💡 재미있는 사실!</span> ${s.wow}</div>
+          <div class="guide-body">
+            <div class="guide-title">${s.emoji} ${s.title}</div>
+            <div class="guide-title-en">${s.titleEn}</div>
+            <span class="guide-age">📅 ${s.built}</span>
+            <div class="guide-facts">
+              ${s.facts.map(f => `<div class="guide-fact"><span class="guide-fact-icon">${f.i}</span><span>${f.t}</span></div>`).join('')}
+            </div>
+            <div class="guide-wow"><span class="guide-wow-label">💡 재미있는 사실!</span> ${s.wow}</div>
+          </div>
         </div>
-      </div>
-    `).join('')}
+      `;
+    }).join('')}
   `).join('');
-
-  GUIDE.forEach((g, gi) => {
-    g.sites.forEach((s, si) => {
-      const imgEl = document.getElementById(`gimg-${gi}-${si}`);
-      const fbEl  = document.getElementById(`gfb-${gi}-${si}`);
-      fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(s.wiki)}`)
-        .then(r => r.ok ? r.json() : Promise.reject())
-        .then(data => {
-          let src = data.thumbnail?.source;
-          if (src) {
-            src = src.replace(/\/\d+px-/, '/1200px-');
-          } else {
-            src = data.originalimage?.source;
-          }
-          if (src && imgEl) {
-            imgEl.src = src;
-            imgEl.style.display = '';
-            imgEl.onload  = () => { if (fbEl) fbEl.style.display = 'none'; };
-            imgEl.onerror = () => { imgEl.style.display = 'none'; };
-          }
-        })
-        .catch(() => {});
-    });
-  });
 }
 
 /* ── NAV ── */
