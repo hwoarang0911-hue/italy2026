@@ -170,22 +170,27 @@ body::before {
   padding:12px;
   border:1px solid var(--border);
   box-shadow:var(--shadow);
+  display:flex; align-items:center; gap:12px;
+  font-family:'Noto Sans KR', sans-serif;
 }
-.weather-date { font-size:0.65rem; color:var(--muted); margin-bottom:2px; }
+.weather-date {
+  font-size:0.7rem; color:var(--muted); min-width:28px; flex-shrink:0; font-weight:600;
+}
+.weather-date.date-saturday { color:#2563EB; }
+.weather-date.date-sunday   { color:#DC2626; }
+.weather-date.date-holiday  { color:#DC2626; }
 .weather-city {
   font-weight:700; font-size:0.82rem; color:var(--ink);
-  margin-bottom:6px;
+  min-width:52px; flex-shrink:0;
 }
-.weather-main { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
-.weather-icon { font-size:1.6rem; }
-.weather-temp { font-size:1.2rem; font-weight:700; color:var(--terracotta); }
-.weather-desc { font-size:0.65rem; color:var(--muted); }
-.weather-detail {
-  display:grid; grid-template-columns:1fr 1fr; gap:4px;
-  border-top:1px solid var(--border); padding-top:6px;
-}
-.wd-item { font-size:0.62rem; color:var(--ink-soft); }
-.wd-label { color:var(--muted); }
+.weather-icon { font-size:1.4rem; flex-shrink:0; }
+.weather-temp { font-size:0.92rem; font-weight:700; color:var(--terracotta); white-space:nowrap; }
+.weather-desc { font-size:0.65rem; color:var(--muted); white-space:nowrap; }
+.weather-main { display:flex; align-items:center; gap:6px; flex:1; }
+.weather-cities { flex:1; display:flex; flex-direction:column; }
+.weather-city-row { display:flex; align-items:center; gap:8px; padding:2px 0; }
+.weather-city-row.row-divider { border-top:1px solid var(--border); margin-top:5px; padding-top:5px; }
+.weather-rain { font-size:0.65rem; color:#4A90D9; margin-left:5px; font-weight:600; }
 .weather-loading {
   text-align:center; padding:30px; color:var(--muted); font-size:0.8rem;
 }
@@ -689,6 +694,15 @@ const CITY_COORDS = [
   { name:'밀라노', lat:45.4642, lon:9.1900, dates:['6/2'] },
 ];
 
+function getDateClass(dateStr) {
+  if (dateStr === '6/2') return 'date-holiday';
+  const [m, d] = dateStr.split('/').map(Number);
+  const dow = new Date(2026, m - 1, d).getDay();
+  if (dow === 6) return 'date-saturday';
+  if (dow === 0) return 'date-sunday';
+  return '';
+}
+
 async function fetchWeather() {
   const grid = document.getElementById('weatherGrid');
   grid.innerHTML = '';
@@ -696,73 +710,114 @@ async function fetchWeather() {
   const today = new Date();
   const tripStart = new Date('2026-05-22');
   const daysUntilTrip = Math.ceil((tripStart - today) / (1000 * 60 * 60 * 24));
-  const useForecast = daysUntilTrip <= 16;
+  // Raw API data keyed by 'date|city'
+  const apiData = {};
 
-  const apiBase = useForecast
-    ? 'https://api.open-meteo.com/v1/forecast'
-    : 'https://archive-api.open-meteo.com/v1/archive';
-  const startDate = useForecast ? '2026-05-22' : '2025-05-22';
-  const endDate   = useForecast ? '2026-06-02' : '2025-06-02';
+  if (daysUntilTrip <= 16) {
+    const maxForecast = new Date(today);
+    maxForecast.setDate(maxForecast.getDate() + 16);
+    const apiEnd = maxForecast < new Date('2026-06-02')
+      ? maxForecast.toISOString().slice(0, 10)
+      : '2026-06-02';
 
-  try {
-    for (const city of CITY_COORDS) {
-      const url = `${apiBase}?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,sunrise,sunset&timezone=Europe%2FRome&start_date=${startDate}&end_date=${endDate}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const daily = data.daily;
-      if (!daily) continue;
+    try {
+      for (const city of CITY_COORDS) {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max,temperature_2m_min,weathercode,precipitation_probability_max&timezone=Europe%2FRome&start_date=2026-05-22&end_date=${apiEnd}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const daily = data.daily;
+        if (!daily) continue;
 
-      for (let i = 0; i < daily.time.length; i++) {
-        const dateStr = daily.time[i];
-        // archive returns 2025-MM-DD, forecast returns 2026-MM-DD — normalise to MM/DD
-        const mmdd = dateStr.slice(5).replace('-','/');
-        const mmddShort = mmdd.replace(/^0/,'');
+        for (let i = 0; i < daily.time.length; i++) {
+          const dateStr = daily.time[i];
+          const mmdd = dateStr.slice(5).replace('-', '/');
+          const mmddShort = mmdd.replace(/^0/, '');
 
-        const matchDate = city.dates.some(d => {
-          const nd = d.replace('5/','05/').replace('6/','06/');
-          return nd === mmdd || d === mmddShort;
-        });
-        if (!matchDate) continue;
+          const matchDate = city.dates.some(d => {
+            const nd = d.replace('5/', '05/').replace('6/', '06/');
+            return nd === mmdd || d === mmddShort;
+          });
+          if (!matchDate) continue;
 
-        const tmax = daily.temperature_2m_max[i];
-        const tmin = daily.temperature_2m_min[i];
-        const wc = daily.weathercode[i];
-        const sunrise = daily.sunrise?.[i]?.slice(11,16);
-        const sunset  = daily.sunset?.[i]?.slice(11,16);
+          const tmax     = daily.temperature_2m_max[i];
+          const tmin     = daily.temperature_2m_min[i];
+          const wc       = daily.weathercode[i] ?? 0;
+          const rainProb = daily.precipitation_probability_max?.[i] ?? 0;
+          const {icon, desc} = wcToEmoji(wc);
+          const rainHtml = rainProb >= 20 ? `<span class="weather-rain">💧${rainProb}%</span>` : '';
 
-        const {icon, desc} = wcToEmoji(wc);
-
-        const card = document.createElement('div');
-        card.className = 'weather-card';
-        card.innerHTML = `
-          <div class="weather-date">${mmddShort}</div>
-          <div class="weather-city">${city.name}</div>
-          <div class="weather-main">
-            <span class="weather-icon">${icon}</span>
-            <div>
-              <div class="weather-temp">${Math.round(tmax)}° / ${Math.round(tmin)}°</div>
-              <div class="weather-desc">${desc}</div>
-            </div>
-          </div>
-          <div class="weather-detail">
-            <div class="wd-item"><span class="wd-label">일출 </span>${sunrise||'-'}</div>
-            <div class="wd-item"><span class="wd-label">일몰 </span>${sunset||'-'}</div>
-          </div>
-        `;
-        grid.appendChild(card);
+          apiData[mmddShort + '|' + city.name] = {
+            tmax: Math.round(tmax), tmin: Math.round(tmin), icon, desc, rainHtml
+          };
+        }
       }
-    }
-    if (!grid.children.length) {
-      grid.innerHTML = '<div class="weather-loading">날씨 데이터가 없습니다</div>';
-    } else if (!useForecast) {
-      const note = document.createElement('p');
-      note.style.cssText = 'grid-column:1/-1;text-align:center;font-size:0.78rem;color:#888;margin:4px 0 0;';
-      note.textContent = '📅 출발 16일 전부터 실제 예보로 자동 전환됩니다 (현재: 2025년 같은 기간 실측치)';
-      grid.appendChild(note);
-    }
-  } catch(e) {
-    grid.innerHTML = '<div class="weather-loading">⚠️ 날씨를 불러올 수 없습니다<br><small>인터넷 연결을 확인해 주세요</small></div>';
+    } catch(_) {}
   }
+
+  // Group WEATHER_ESTIMATES by date, preserving order
+  const dateOrder = [];
+  const dateGroups = {};
+  for (const e of WEATHER_ESTIMATES) {
+    if (!dateGroups[e.date]) {
+      dateGroups[e.date] = [];
+      dateOrder.push(e.date);
+    }
+    dateGroups[e.date].push(e);
+  }
+
+  let apiCount = 0;
+  let usedEstimate = false;
+
+  for (const date of dateOrder) {
+    const cities = dateGroups[date];
+    const dateClass = getDateClass(date);
+
+    const card = document.createElement('div');
+    card.className = 'weather-card';
+
+    const dateDiv = document.createElement('div');
+    dateDiv.className = 'weather-date' + (dateClass ? ' ' + dateClass : '');
+    dateDiv.textContent = date;
+    card.appendChild(dateDiv);
+
+    const citiesDiv = document.createElement('div');
+    citiesDiv.className = 'weather-cities';
+
+    cities.forEach((e, idx) => {
+      const apiEntry = apiData[e.date + '|' + e.city] || null;
+      if (apiEntry) apiCount++;
+      else usedEstimate = true;
+
+      const { tmax, tmin, icon, desc, rainHtml } = apiEntry || {
+        tmax: e.tmax, tmin: e.tmin, icon: e.icon, desc: e.desc,
+        rainHtml: e.rain != null ? `<span class="weather-rain">💧${e.rain}%</span>` : ''
+      };
+
+      const row = document.createElement('div');
+      row.className = 'weather-city-row' + (idx > 0 ? ' row-divider' : '');
+      row.innerHTML = `
+        <div class="weather-city">${e.city}</div>
+        <span class="weather-icon">${icon}</span>
+        <div class="weather-main">
+          <div class="weather-temp">${tmax}° / ${tmin}°</div>
+          <div class="weather-desc">${desc}${rainHtml}</div>
+        </div>
+      `;
+      citiesDiv.appendChild(row);
+    });
+
+    card.appendChild(citiesDiv);
+    grid.appendChild(card);
+  }
+
+  const note = document.createElement('p');
+  note.style.cssText = 'text-align:center;font-size:0.72rem;color:#888;margin:6px 0 0;';
+  note.textContent = apiCount > 0 && usedEstimate
+    ? `🌐 실시간 예보(${apiCount}일) + 📊 ECMWF 예측치 혼합`
+    : apiCount > 0
+      ? '🌐 Open-Meteo 실시간 예보'
+      : '📊 Aeronautica Militare · ECMWF · world-weather.info 기반 예측';
+  grid.appendChild(note);
 }
 
 function wcToEmoji(wc) {
