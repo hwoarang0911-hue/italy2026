@@ -1265,7 +1265,12 @@ function renderGuide() {
       fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(s.wiki)}`)
         .then(r => r.ok ? r.json() : Promise.reject())
         .then(data => {
-          const src = data.thumbnail?.source || data.originalimage?.source;
+          let src = data.thumbnail?.source;
+          if (src) {
+            src = src.replace(/\/\d+px-/, '/1200px-');
+          } else {
+            src = data.originalimage?.source;
+          }
           if (src && imgEl) {
             imgEl.src = src;
             imgEl.style.display = '';
