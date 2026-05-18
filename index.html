@@ -380,6 +380,44 @@ body::before {
 .progress-bar-wrap { height:6px; background:var(--border); border-radius:3px; margin-top:10px; }
 .progress-bar { height:6px; border-radius:3px; background:var(--terracotta); transition:width 0.5s; }
 .progress-label { font-size:0.65rem; color:var(--muted); margin-top:4px; text-align:right; }
+
+/* ── GUIDE ── */
+.guide-city-header {
+  font-size:0.88rem; font-weight:700; color:var(--terracotta);
+  padding:4px 0 6px; margin:18px 0 8px;
+  border-bottom:2px solid var(--terracotta);
+  display:flex; align-items:center; gap:6px;
+  font-family:'Noto Sans KR',sans-serif;
+}
+.guide-city-header:first-child { margin-top:4px; }
+.guide-card {
+  background:white; border-radius:14px; overflow:hidden;
+  border:1px solid var(--border); box-shadow:var(--shadow); margin-bottom:12px;
+}
+.guide-img-wrap { position:relative; width:100%; height:185px; background:var(--warm); overflow:hidden; }
+.guide-img { width:100%; height:100%; object-fit:cover; display:block; }
+.guide-img-fallback {
+  display:none; position:absolute; inset:0;
+  align-items:center; justify-content:center; font-size:3.5rem;
+  background:linear-gradient(135deg, var(--warm), rgba(201,150,58,0.2));
+}
+.guide-body { padding:12px 14px 14px; }
+.guide-title { font-size:0.95rem; font-weight:700; color:var(--ink); font-family:'Noto Sans KR',sans-serif; }
+.guide-title-en { font-size:0.67rem; color:var(--muted); margin-bottom:6px; font-style:italic; }
+.guide-age {
+  display:inline-block; background:rgba(198,93,59,0.1); color:var(--terracotta);
+  font-size:0.67rem; font-weight:600; padding:2px 8px; border-radius:8px; margin-bottom:9px;
+}
+.guide-facts { margin-bottom:10px; display:flex; flex-direction:column; gap:5px; }
+.guide-fact { font-size:0.77rem; color:var(--ink-soft); display:flex; gap:6px; line-height:1.5; }
+.guide-fact-icon { flex-shrink:0; width:18px; text-align:center; }
+.guide-wow {
+  background:linear-gradient(135deg, rgba(198,93,59,0.07), rgba(201,150,58,0.1));
+  border-left:3px solid var(--terracotta);
+  border-radius:0 8px 8px 0;
+  padding:8px 10px; font-size:0.75rem; color:var(--ink); line-height:1.6;
+}
+.guide-wow-label { font-weight:700; color:var(--terracotta); }
 </style>
 </head>
 <body>
@@ -415,6 +453,7 @@ body::before {
     <button class="nav-tab" onclick="showSection('train')">🚂 기차</button>
     <button class="nav-tab" onclick="showSection('todo')">✅ 할일</button>
     <button class="nav-tab" onclick="showSection('prep')">🎒 준비</button>
+    <button class="nav-tab" onclick="showSection('guide')">🏛 유적지</button>
   </div>
 </div>
 
@@ -526,6 +565,13 @@ body::before {
   <div class="card">
     <div id="prepList"></div>
   </div>
+</div>
+
+<!-- ══ GUIDE ══ -->
+<div class="section" id="section-guide">
+  <div class="section-title">🏛 유적지 가이드</div>
+  <p style="font-size:0.75rem;color:var(--muted);margin-bottom:4px;">📚 초등 고학년이 읽기 좋은 알기 쉬운 설명이에요!</p>
+  <div id="guideList"></div>
 </div>
 
 <script>
@@ -688,6 +734,163 @@ const PREP = [
   { city:'베네치아', text:'곤돌라: 낮 90EUR, 밤 110EUR (30분, 노래 없음)' },
   { city:'몬차', text:'레이싱 티켓 사전 구매 (48EUR)' },
   { city:'토리노', text:'주차: Ferraris, Corso Bolzano (ZTL 밖)' },
+];
+
+/* ── GUIDE DATA ── */
+const GUIDE = [
+  { city:'🏙️ 로마', sites:[
+    { emoji:'⚔️', title:'콜로세움', titleEn:'Colosseo',
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Colosseum_in_Rome-April_2007-1-_copie_2B.jpg/800px-Colosseum_in_Rome-April_2007-1-_copie_2B.jpg',
+      imgFb:'🏟️', built:'서기 72~80년 · 약 1,950년 전',
+      facts:[
+        {i:'📐', t:'높이 48m (15층 아파트) · 둘레 527m'},
+        {i:'👥', t:'최대 5만~8만 명 수용 가능'},
+        {i:'⚔️', t:'검투사 대결 & 맹수 경기를 구경하던 원형 경기장'},
+        {i:'🤴', t:'황제 엄지 위 = 살리기 / 엄지 아래 = 처형 — 영화에서 많이 나와요!'},
+      ],
+      wow:'지하에 비밀 통로가 있어서 맹수와 검투사가 무대 바닥을 뚫고 <b>갑자기 등장</b>했어요! 천막 지붕을 조종하는 데만 선원 <b>1,000명</b>이 필요했대요.' },
+    { emoji:'🏛️', title:'판테온', titleEn:'Pantheon',
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Pantheon_Rome_2011.jpg/800px-Pantheon_Rome_2011.jpg',
+      imgFb:'🏛️', built:'서기 125년 완공 · 약 1,900년 전',
+      facts:[
+        {i:'🕳️', t:'돔 꼭대기 지름 9m 구멍(오쿨루스) — 비가 들어와도 바닥 배수구로 알아서 빠져요'},
+        {i:'📏', t:'돔 지름 43.3m — 무려 1,300년 동안 세계 최대 돔 기록!'},
+        {i:'🏗️', t:'특수 콘크리트로 만들어 2,000년이 지나도 균열 없음 — 현대 과학자들도 연구 중'},
+        {i:'👑', t:'이탈리아 통일 왕 비토리오 에마누엘레 2세의 무덤이 안에 있어요'},
+      ],
+      wow:'<b>기원전 27년</b>에 처음 지어지고, 지금 건물은 서기 125년에 다시 지은 것! <b>약 1,900년 된</b> 건물이 이렇게 멀쩡한 게 정말 놀랍죠?' },
+    { emoji:'⛲', title:'트레비 분수', titleEn:'Fontana di Trevi',
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Fontana_di_Trevi_-_Roma.jpg/800px-Fontana_di_Trevi_-_Roma.jpg',
+      imgFb:'⛲', built:'1762년 완성 · 약 260년 전',
+      facts:[
+        {i:'📐', t:'높이 26m · 폭 49m — 로마에서 가장 큰 분수'},
+        {i:'🪙', t:'동전 1개=로마 재방문 / 2개=사랑 성취 / 3개=이별 전설'},
+        {i:'💰', t:'하루에 모이는 동전이 약 300만 원 이상 — 가난한 분들을 돕는 데 써요'},
+        {i:'💧', t:'기원전 19년부터 이어진 수도관이 지금도 연결 중 — 약 2,000년 된 수도관!'},
+      ],
+      wow:'영화 《로마의 휴일》에서 오드리 헵번이 아이스크림 먹던 곳으로 유명해요. 매년 <b>수억 원</b>의 동전이 쌓여요!' },
+    { emoji:'🕍', title:'바티칸 박물관 & 성 베드로 대성당', titleEn:'Vatican Museums & St. Peter\'s Basilica',
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg/800px-Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg',
+      imgFb:'⛪', built:'성당 1626년 완공 · 박물관 16세기~',
+      facts:[
+        {i:'🌍', t:'바티칸 = 세계에서 가장 작은 나라 (면적 0.44㎢, 여의도의 약 1/10)'},
+        {i:'🖼️', t:'박물관 전시실 54개 · 작품 7만 점 — 1분씩 봐도 2년 걸려요!'},
+        {i:'🎨', t:'시스티나 성당 천장화: 미켈란젤로가 4년(1508~1512) 혼자 그림 · 인물 300명 이상'},
+        {i:'⛪', t:'성 베드로 대성당: 높이 136m · 한 번에 6만 명 수용'},
+      ],
+      wow:'미켈란젤로는 천장을 올려다보며 그려야 해서 <b>목과 허리가 항상 아팠대요</b>. "신과 아담의 손가락이 맞닿는 장면"이 세계에서 가장 유명한 그림 중 하나예요!' },
+    { emoji:'🏰', title:'천사의 성', titleEn:'Castel Sant\'Angelo',
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Castel_Sant%27Angelo_from_bridge_with_angels.jpg/800px-Castel_Sant%27Angelo_from_bridge_with_angels.jpg',
+      imgFb:'🏰', built:'서기 139년 · 약 1,880년 전',
+      facts:[
+        {i:'👑', t:'원래 로마 황제 하드리아누스의 무덤으로 지어졌어요'},
+        {i:'👼', t:'590년 전염병 때 교황이 기도하자 천사 환상이 나타났다고 해서 이름이 붙여졌어요'},
+        {i:'🚇', t:'바티칸 궁전과 잇는 800m 비밀 통로(파세토) — 교황 탈출용!'},
+      ],
+      wow:'이 비밀 통로는 실제로 <b>여러 번 사용</b>됐어요. 위험에 처한 교황들이 이 통로로 몰래 도망쳤다고 해요. 지금도 통로가 남아있어요!' },
+  ]},
+  { city:'🌿 티볼리', sites:[
+    { emoji:'🌊', title:'빌라 데스테', titleEn:'Villa d\'Este',
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Tivoli_-_Villa_d%27Este_%28Fontana_dell%27Organo%29.jpg/800px-Tivoli_-_Villa_d%27Este_%28Fontana_dell%27Organo%29.jpg',
+      imgFb:'⛲', built:'1550년대 · 약 470년 전',
+      facts:[
+        {i:'⛲', t:'정원 안에 분수 500개 이상 — 전기 없이 산에서 내려오는 물의 힘만으로 작동!'},
+        {i:'💧', t:'\'100개의 분수\' — 긴 수로를 따라 양쪽에 100개 분수가 줄지어 있어요'},
+        {i:'🌍', t:'유네스코 세계문화유산'},
+      ],
+      wow:'전기를 한 방울도 쓰지 않고 <b>중력과 수압만으로</b> 500개 분수를 동시에 작동시켜요. 르네상스 시대 최고의 수리 기술이에요!' },
+  ]},
+  { city:'🌸 피렌체', sites:[
+    { emoji:'⛪', title:'피렌체 두오모', titleEn:'Cattedrale di Santa Maria del Fiore',
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Cattedrale_di_Santa_Maria_del_Fiore_-_facade_-_Sept_2017.jpg/800px-Cattedrale_di_Santa_Maria_del_Fiore_-_facade_-_Sept_2017.jpg',
+      imgFb:'⛪', built:'1296년 착공 → 1436년 완성 · 140년 소요',
+      facts:[
+        {i:'🔵', t:'돔 지름 45m — 당시엔 불가능하다던 크기를 브루넬레스키가 크레인 없이 완성!'},
+        {i:'🏆', t:'세계에서 4번째로 큰 성당'},
+        {i:'🪜', t:'꼭대기까지 계단 463개 — 올라가면 피렌체 전경이 한눈에!'},
+        {i:'🔔', t:'바로 옆 조토의 종탑과 황금 문(천국의 문)도 꼭 보세요'},
+      ],
+      wow:'어떻게 만들었는지 <b>지금도 완전히 밝혀지지 않았어요</b>. 브루넬레스키는 비밀을 지키기 위해 설계도를 아무에게도 알려주지 않았대요!' },
+    { emoji:'🌉', title:'베키오 다리', titleEn:'Ponte Vecchio',
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Ponte_vecchio_al_tramonto.jpg/800px-Ponte_vecchio_al_tramonto.jpg',
+      imgFb:'🌉', built:'1345년 · 약 680년 전',
+      facts:[
+        {i:'🏪', t:'다리 위에 가게가 빽빽이 — 원래 푸줏간이었다가 냄새 때문에 금은방으로 교체'},
+        {i:'💎', t:'지금도 보석·금은방 가게들이 줄지어 있어요'},
+        {i:'🚇', t:'다리 위층에 메디치 가문의 1km 비밀 통로 — 암살 피해 궁전을 오가던 통로'},
+      ],
+      wow:'2차 세계대전 때 독일군이 피렌체 다리를 모두 폭파했는데, 베키오 다리만 살아남았어요. <b>히틀러가 너무 아름다워서</b> 폭파 명령을 취소했다는 이야기가 있어요!' },
+  ]},
+  { city:'🗼 피사', sites:[
+    { emoji:'🗼', title:'피사의 사탑', titleEn:'Torre di Pisa',
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Leaning_tower_of_pisa_2.jpg/800px-Leaning_tower_of_pisa_2.jpg',
+      imgFb:'🗼', built:'1173년 착공 → 1372년 완공 · 200년 소요',
+      facts:[
+        {i:'📐', t:'현재 약 3.97도 기울어짐 · 꼭대기가 수직에서 약 3.9m 벗어나 있어요'},
+        {i:'🏗️', t:'공사 도중 땅이 약해서 기울기 시작 — 멈췄다가 다시 짓는 과정에서 더 기울었어요'},
+        {i:'🔬', t:'과학자들이 흙을 조금씩 빼내며 균형을 잡아 지금은 더 이상 기울지 않아요'},
+        {i:'🍎', t:'갈릴레오가 이 탑에서 공 떨어뜨리는 실험을 했다는 전설이 있어요'},
+      ],
+      wow:'<b>200년에 걸쳐 지은</b> 탑이에요! 중간에 공사를 멈춘 기간만 100년이 넘어요. 덕분에 땅이 굳어 안 무너지는 데 도움이 됐다는 연구도 있어요!' },
+  ]},
+  { city:'🚤 베네치아', sites:[
+    { emoji:'🏛️', title:'두칼레 궁전 & 탄식의 다리', titleEn:'Palazzo Ducale & Ponte dei Sospiri',
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Ponte_dei_Sospiri.jpg/800px-Ponte_dei_Sospiri.jpg',
+      imgFb:'🌉', built:'서기 9세기~ · 1,100년 역사',
+      facts:[
+        {i:'👑', t:'697~1797년 1,100년간 베네치아 총독의 궁전 — 세계에서 가장 오래 지속된 공화국의 심장'},
+        {i:'😮‍💨', t:'탄식의 다리: 죄인이 재판 후 감옥으로 끌려가며 창문으로 마지막 베네치아를 보며 탄식했대요'},
+        {i:'🕊️', t:'산 마르코 광장 — 나폴레옹이 "유럽에서 가장 아름다운 응접실"이라고 불렀어요'},
+      ],
+      wow:'탄식의 다리 아래로 곤돌라를 타고 지날 때 연인이 키스하면 <b>영원한 사랑</b>이 이루어진다는 전설이 있어요!' },
+  ]},
+  { city:'⛰️ 돌로미티', sites:[
+    { emoji:'🏔️', title:'돌로미티', titleEn:'Dolomiti',
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Tre_Cime_di_Lavaredo_e_Auronzo.jpg/800px-Tre_Cime_di_Lavaredo_e_Auronzo.jpg',
+      imgFb:'🏔️', built:'약 2억 5천만 년 전 형성',
+      facts:[
+        {i:'🌍', t:'2009년 유네스코 자연유산 · 지구상 가장 아름다운 산 풍경 중 하나'},
+        {i:'🪸', t:'원래 바다 밑! 산호초·조개껍데기가 돌이 되고, 땅이 솟아 산이 됐어요. 화석도 발견돼요!'},
+        {i:'🚣', t:'브라이에스 호수 — 에메랄드빛 호수에 빨간 보트가 있는 사진으로 유명'},
+        {i:'🏔️', t:'카레짜 호수 — 산 봉우리가 호수에 비치는 환상적인 풍경'},
+      ],
+      wow:'하얀 바위가 특이한 이유: <b>2억 5천만 년 전 깊은 바다 속</b> 산호초와 조개가 돌이 됐기 때문이에요. 그래서 산 꼭대기에서 바다 생물 화석이 나와요!' },
+  ]},
+  { city:'🏛️ 베로나', sites:[
+    { emoji:'🏟️', title:'베로나 아레나 & 줄리엣의 집', titleEn:'Arena di Verona & Casa di Giulietta',
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Arena_di_Verona.jpg/800px-Arena_di_Verona.jpg',
+      imgFb:'🏟️', built:'서기 1세기 · 약 2,000년 전',
+      facts:[
+        {i:'🎭', t:'콜로세움보다 조금 작지만 지금도 실제 사용 — 여름에 야외 오페라 공연이 열려요!'},
+        {i:'💌', t:'줄리엣의 집: 셰익스피어 소설 속 배경. 전 세계 연인들이 사랑 편지를 붙여놓아요'},
+        {i:'💑', t:'발코니에서 줄리엣이 로미오를 불렀다는 전설 (소설 속 이야기예요!)'},
+      ],
+      wow:'베로나 아레나는 로마 시대부터 지금까지 계속 쓰이는 <b>세계 최고령 현역 공연장</b> 중 하나예요. 약 2만 명이 야외에서 오페라를 관람해요!' },
+  ]},
+  { city:'🏙️ 토리노', sites:[
+    { emoji:'🏺', title:'이집트 박물관', titleEn:'Museo Egizio',
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Egyptian_Museum%2C_Turin.jpg/800px-Egyptian_Museum%2C_Turin.jpg',
+      imgFb:'🏺', built:'1824년 개관 · 세계 2위 이집트 컬렉션',
+      facts:[
+        {i:'🌍', t:'카이로 다음으로 세계에서 두 번째로 큰 이집트 유물 컬렉션'},
+        {i:'📦', t:'유물 무려 3만 점 이상!'},
+        {i:'🧿', t:'실제 미라, 파피루스 문서, 거대 석상을 직접 볼 수 있어요'},
+        {i:'🏛️', t:'이집트에서 통째로 가져온 엘레세야 신전도 있어요!'},
+      ],
+      wow:'왜 이탈리아에 이집트 박물관이? 18~19세기 이탈리아 탐험가들이 이집트에서 <b>직접 유물을 가져왔기 때문</b>이에요. 덕분에 여기서 3만 점이 넘는 이집트 유물을 볼 수 있어요!' },
+  ]},
+  { city:'🏙️ 밀라노', sites:[
+    { emoji:'⛪', title:'밀라노 두오모', titleEn:'Duomo di Milano',
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Milan_Cathedral_from_Piazza_del_Duomo.jpg/800px-Milan_Cathedral_from_Piazza_del_Duomo.jpg',
+      imgFb:'⛪', built:'1386년 착공 → 1965년 완공 · 579년 소요',
+      facts:[
+        {i:'⏳', t:'세계에서 건축에 가장 오래 걸린 건물 중 하나 — 무려 579년!'},
+        {i:'🏆', t:'세계에서 5번째로 큰 성당 · 동시에 4만 명 수용'},
+        {i:'🗼', t:'첨탑 135개 · 조각상 3,400개 이상'},
+        {i:'💛', t:'가장 높은 첨탑 위 황금빛 마돈니나(108.5m) — 오랫동안 이보다 높은 건물을 짓지 않았어요'},
+      ],
+      wow:'지붕 위를 <b>직접 걸어다닐 수 있어요!</b> 엘리베이터로 올라가 첨탑 사이를 산책하면, 맑은 날엔 멀리 알프스 산맥까지 보인대요!' },
+  ]},
 ];
 
 /* ── WEATHER API ── */
@@ -1035,6 +1238,32 @@ function renderPrep() {
   `).join('');
 }
 
+/* ── GUIDE RENDER ── */
+function renderGuide() {
+  const container = document.getElementById('guideList');
+  container.innerHTML = GUIDE.map(g => `
+    <div class="guide-city-header">${g.city}</div>
+    ${g.sites.map(s => `
+      <div class="guide-card">
+        <div class="guide-img-wrap">
+          <img class="guide-img" src="${s.img}" alt="${s.title}" loading="lazy"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="guide-img-fallback">${s.imgFb}</div>
+        </div>
+        <div class="guide-body">
+          <div class="guide-title">${s.emoji} ${s.title}</div>
+          <div class="guide-title-en">${s.titleEn}</div>
+          <span class="guide-age">📅 ${s.built}</span>
+          <div class="guide-facts">
+            ${s.facts.map(f => `<div class="guide-fact"><span class="guide-fact-icon">${f.i}</span><span>${f.t}</span></div>`).join('')}
+          </div>
+          <div class="guide-wow"><span class="guide-wow-label">💡 재미있는 사실!</span> ${s.wow}</div>
+        </div>
+      </div>
+    `).join('')}
+  `).join('');
+}
+
 /* ── NAV ── */
 function showSection(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -1049,6 +1278,7 @@ renderBudget();
 renderTrains();
 renderTodos();
 renderPrep();
+renderGuide();
 fetchExchange();
 fetchWeather();
 // Refresh exchange every 5 minutes
