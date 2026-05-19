@@ -1252,14 +1252,30 @@ function renderGuide() {
     'Egyptian Museum, Turin':'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Egyptian_Museum%2C_Turin.jpg/800px-Egyptian_Museum%2C_Turin.jpg',
     'Milan Cathedral':       'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Milan_Cathedral_from_Piazza_del_Duomo.jpg/800px-Milan_Cathedral_from_Piazza_del_Duomo.jpg',
   };
+  const LOCAL = {
+    'Colosseum':             'img/colosseum.jpg',
+    'Pantheon, Rome':        'img/pantheon.jpg',
+    'Trevi Fountain':        'img/trevi.jpg',
+    "St. Peter's Basilica":  'img/stpeters.jpg',
+    "Castel Sant'Angelo":    'img/castel.jpg',
+    "Villa d'Este, Tivoli":  'img/villaDeste.jpg',
+    'Florence Cathedral':    'img/florence.jpg',
+    'Ponte Vecchio':         'img/ponteVecchio.jpg',
+    'Leaning Tower of Pisa': 'img/pisa.jpg',
+    'Bridge of Sighs':       'img/sighs.jpg',
+    'Dolomites':             'img/dolomites.jpg',
+    'Arena di Verona':       'img/verona.jpg',
+    'Egyptian Museum, Turin':'img/egyptian.jpg',
+    'Milan Cathedral':       'img/milan.jpg',
+  };
   const container = document.getElementById('guideList');
   container.innerHTML = GUIDE.map(g => `
     <div class="guide-city-header">${g.city}</div>
     ${g.sites.map(s => `
       <div class="guide-card">
         <div class="guide-img-wrap">
-          <img class="guide-img" src="${IMGS[s.wiki] || ''}" alt="${s.title}"
-               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <img class="guide-img" src="${IMGS[s.wiki]}" alt="${s.title}" loading="lazy"
+               onerror="this.onerror=null;this.src='${LOCAL[s.wiki]}'">
           <div class="guide-img-fallback">${s.imgFb}</div>
         </div>
         <div class="guide-body">
